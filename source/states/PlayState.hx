@@ -76,7 +76,7 @@ class PlayState extends BeatState
 			if ((FlxG.width + note.width) < note.x && note.isOnScreen(FlxG.camera))
 				note.kill();
 
-			note.x = (strumline.x + (Conductor.songPosition - note.songTime) * ((1 / (Conductor.bpm / 60)) * speed));
+			note.x = (strumline.x + (Conductor.songPosition - note.songTime) * (0.4 * speed));
 		});
 
 		if (FlxG.keys.justPressed.R)

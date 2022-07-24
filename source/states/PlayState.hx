@@ -1,5 +1,6 @@
 package states;
 
+import flixel.util.FlxTimer;
 import props.Note;
 import flixel.group.FlxGroup.FlxTypedGroup;
 import flixel.FlxSprite;
@@ -47,25 +48,43 @@ class PlayState extends BeatState
 		add(notes);
 
 		generateTest();
-
-		Conductor.changeBPM(140);
-		FlxG.sound.playMusic(Asset.music("test"), 1, false);
+		countdown();
 	}
 
 	var speed:Int = 1;
 	override public function update(elapsed:Float):Void
 	{
 		// daNote.y = (strumLine.y - (Conductor.songPosition - daNote.strumTime) * (0.45 * FlxMath.roundDecimal(SONG.speed, 2)));
+		// ermm,,, clean up
+		if (songStarting)
+		{
+			if (counting)
+			{
+				Conductor.songPosition += FlxG.elapsed * 1000;
+				if (Conductor.songPosition >= 0)
+					songStart();
+			}
+		}
+		else
+		{
+			if (FlxG.sound.music != null && FlxG.sound.music.playing)
+				Conductor.songPosition += FlxG.elapsed * 1000;
+		}
+		
 		notes.forEachAlive(function(note:Note)
 		{
 			if ((FlxG.width + note.width) < note.x && note.isOnScreen(FlxG.camera))
 				note.kill();
 
-			note.x = (strumline.x + (Conductor.songPosition - note.songTime) * (0.4 * speed));
+			note.x = (strumline.x + (Conductor.songPosition - note.songTime) * ((1 / (Conductor.bpm / 60)) * speed));
 		});
 
 		if (FlxG.keys.justPressed.R)
+		{
+			if (FlxG.sound.music.playing)
+				FlxG.sound.music.stop();
 			FlxG.resetState();
+		}
 
 		super.update(elapsed);
 	}
@@ -75,9 +94,33 @@ class PlayState extends BeatState
 		trace('beat$curBeat | time${FlxG.sound.music.time}');
 	}
 
+	function songStart():Void
+	{
+		songStarting = false;
+		Conductor.changeBPM(140);
+		FlxG.sound.playMusic(Asset.music("test"), 1, false);
+	}
+
+	var counting:Bool = false;
+	var songStarting:Bool = false;
+	function countdown():Void
+	{
+		counting = true;
+		songStarting = true;
+
+		Conductor.songPosition = 0 - (Conductor.crochet * 5);
+
+		var count:Int = 0;
+		new FlxTimer().start(Conductor.crochet / 1000, function(_:FlxTimer)
+		{
+			trace(count);
+			count++;
+		}, 5);
+	}
+
 	function generateTest():Void
 	{
-		var times:Array<Int> = [439, 859, 1299, 1719, 2159, 2579, 3019, 3439, 3859, 4319, 4719, 5159, 5579, 6019, 6439];
+		var times:Array<Int> = [0, 439, 859, 1299, 1719, 2159, 2579, 3019, 3439, 3859, 4319, 4719, 5159, 5579, 6019, 6439];
 		for (time in times)
 		{
 			var note:Note = new Note(time);

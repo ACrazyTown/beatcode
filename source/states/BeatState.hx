@@ -1,6 +1,5 @@
 package states;
 
-import flixel.FlxG;
 import flixel.FlxState;
 import utils.Conductor;
 
@@ -20,12 +19,6 @@ class BeatState extends FlxState
 
 	override function update(elapsed:Float):Void
 	{
-		if (FlxG.sound.music != null)
-		{
-			if (FlxG.sound.music.playing)
-				Conductor.songPosition = FlxG.sound.music.time;
-		}
-
 		var oldStep:Int = curStep;
 
 		updateCurStep();

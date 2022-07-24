@@ -62,7 +62,6 @@ class ChartEditor extends BeatState
         else
             this.CHART = chart;
 
-        loadSong(CHART.song);
         super();
     }
 
@@ -81,7 +80,7 @@ class ChartEditor extends BeatState
         createSongUI();
 
         infoTxt = new FlxText(0, 0, 0, 'curStep: $curStep\ncurBeat: $curBeat\nTime: 0\n', 18);
-        infoTxt.setPosition((FlxG.width - infoTxt.width) - 5, 5);
+        infoTxt.setPosition((FlxG.width - infoTxt.width) - 50, 5);
         add(infoTxt);
 
         songStuffText = new FlxText(0, 0, 0, 'Song: ${CHART.song}\nBPM: ${CHART.bpm}\nSpeed: ${CHART.speed}\n', 18);
@@ -94,6 +93,7 @@ class ChartEditor extends BeatState
 		strumline.alpha = 0.7;
 		add(strumline);
 
+		loadSong(CHART.song);
         super.create();
     }
 
@@ -140,6 +140,8 @@ class ChartEditor extends BeatState
         if (FlxG.keys.justPressed.SPACE)
             toggleMusic();
 
+        Conductor.songPosition = FlxG.sound.music.time;
+        updateTexts();
         super.update(elapsed);
     }
 
@@ -165,7 +167,7 @@ class ChartEditor extends BeatState
         if (FlxG.sound.music != null)
             FlxG.sound.music.stop();
 
-        FlxG.sound.playMusic(Asset.music(song.toLowerCase()));
+        FlxG.sound.playMusic(Asset.music(song.toLowerCase()), 0.6, false);
         FlxG.sound.music.pause();
 		FlxG.sound.music.onComplete = function()
 		{
@@ -177,8 +179,19 @@ class ChartEditor extends BeatState
 
     function toggleMusic():Void
     {
-        trace(FlxG.sound.music);
         FlxG.sound.music.playing ? FlxG.sound.music.pause() : FlxG.sound.music.play();
+    }
+
+    function updateTexts():Void
+    {
+        var time:Float = -1;
+        if (FlxG.sound.music != null)
+            time = FlxG.sound.music.time;
+		infoTxt.text = 'curStep: $curStep\ncurBeat: $curBeat\nTime: ${time}ms\n';
+		//infoTxt.x = (FlxG.width - infoTxt.width) - 5;
+        
+		songStuffText.text = 'Song: ${CHART.song}\nBPM: ${CHART.bpm}\nSpeed: ${CHART.speed}\n';
+		//songStuffText.x = (infoTxt.x - songStuffText.width) - 5;
     }
 
     function createGrid():Void

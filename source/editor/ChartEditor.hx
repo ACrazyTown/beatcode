@@ -141,6 +141,7 @@ class ChartEditor extends BeatState
             toggleMusic();
 
         Conductor.songPosition = FlxG.sound.music.time;
+		strumline.x = 120 + ((Conductor.songPosition) * (1 / (Conductor.bpm / 60)));
         updateTexts();
         super.update(elapsed);
     }
@@ -160,6 +161,11 @@ class ChartEditor extends BeatState
             curSection = Math.ceil(CHART.noteTimes.length / sectionSize) - 1;
 		if (curSection > Math.ceil(CHART.noteTimes.length / sectionSize) - 1)
             curSection = 0;
+    }
+
+    function renderNotes():Void
+    {
+
     }
 
     function loadSong(song:String):Void

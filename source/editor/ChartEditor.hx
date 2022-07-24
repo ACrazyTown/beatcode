@@ -161,6 +161,8 @@ class ChartEditor extends BeatState
             curSection = Math.ceil(CHART.noteTimes.length / sectionSize) - 1;
 		if (curSection > Math.ceil(CHART.noteTimes.length / sectionSize) - 1)
             curSection = 0;
+
+        strumline.x = 120;
     }
 
     function renderNotes():Void

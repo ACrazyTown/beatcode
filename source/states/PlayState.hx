@@ -66,7 +66,7 @@ class PlayState extends BeatState
 	override public function create():Void
 	{
 		super.create();
-
+		// use garagband track
 		strumline = new FlxSprite().makeGraphic(10, FlxG.height);
 		strumline.x = (FlxG.width - strumline.width) - 75;
 		strumline.alpha = 0.5;
@@ -90,7 +90,7 @@ class PlayState extends BeatState
 		add(bugsTxt);
 
 		loadSong(curSong);
-		
+
 		bugs = Util.getBugAmount(difficulty, _chart);
 		bugsTxt.text = 'BUGS: $bugs';
 

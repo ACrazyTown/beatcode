@@ -256,6 +256,7 @@ class ChartEditor extends BeatState
                 case "song_speed":
                     CHART.speed = nums.value;
                 case "editor_zoom":
+                    zoom = Std.int(nums.value);
                     zoomShit(nums.value);
 
             }

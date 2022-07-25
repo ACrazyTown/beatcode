@@ -15,11 +15,14 @@ class Note extends FlxSprite
 
     public var countedMiss:Bool = false;
 
+    public var inCharter:Bool = false;
+
     public function new(songTime:Float = 0, inCharter:Bool = false)
     {
         super(-5000, 0);
 
         makeGraphic(24, 24);
+		this.inCharter = inCharter;
         color = inCharter ? FlxColor.RED : FlxG.random.color();
 
         this.songTime = songTime;
@@ -29,23 +32,26 @@ class Note extends FlxSprite
     {
         super.update(elapsed);
 
-        if (songTime > Conductor.songPosition - Conductor.safeZoneOffset)
+        if (!inCharter)
         {
-            if (songTime < Conductor.songPosition + Conductor.safeZoneOffset)
-                canHit = true;
-        }
-        else
-        {
-            canHit = false;
-            late = true;
-        }
+            if (songTime > Conductor.songPosition - Conductor.safeZoneOffset)
+            {
+                if (songTime < Conductor.songPosition + Conductor.safeZoneOffset)
+                    canHit = true;
+            }
+            else
+            {
+                canHit = false;
+                late = true;
+            }
 
-        if (late)
-        {
-            if (alpha != 0.4)
-                alpha = 0.4;
-            if (color != FlxColor.GRAY)
-                color = FlxColor.GRAY;
+            if (late)
+            {
+                if (alpha != 0.4)
+                    alpha = 0.4;
+                if (color != FlxColor.GRAY)
+                    color = FlxColor.GRAY;
+            }
         }
     }
 }

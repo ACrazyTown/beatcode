@@ -1,6 +1,6 @@
 package states;
 
-import props.ShakeableText;
+import flixel.text.FlxText;
 import haxe.Json;
 import editor.ChartEditor.ChartFile;
 import openfl.Assets;
@@ -40,6 +40,10 @@ class PlayState extends BeatState
 	var strumline:FlxSprite;
 	var notes:FlxTypedGroup<Note>;
 
+	var score:Int = 0;
+
+	var statsTxt:FlxText;
+
 	public function new(?song:String):Void
 	{
 		if (song != null)
@@ -61,7 +65,11 @@ class PlayState extends BeatState
 		notes = new FlxTypedGroup<Note>();
 		add(notes);
 
-		//generateTest();
+		statsTxt = new FlxText(0, 0, 0, 'Score: $score', 18);
+		statsTxt.y = (FlxG.height - statsTxt.height) - 5;
+		statsTxt.screenCenter(X);
+		add(statsTxt);
+
 		loadSong(curSong);
 		countdown();
 	}
@@ -70,6 +78,8 @@ class PlayState extends BeatState
 	{
 		// daNote.y = (strumLine.y - (Conductor.songPosition - daNote.strumTime) * (0.45 * FlxMath.roundDecimal(SONG.speed, 2)));
 		// ermm,,, clean up
+		keyCheck();
+
 		if (songStarting)
 		{
 			if (counting)
@@ -88,7 +98,11 @@ class PlayState extends BeatState
 		notes.forEachAlive(function(note:Note)
 		{
 			if ((FlxG.width + note.width) < note.x && note.isOnScreen(FlxG.camera))
+			{
 				note.kill();
+				notes.remove(note);
+				note.destroy();
+			}
 
 			note.x = (strumline.x + (Conductor.songPosition - note.songTime) * (0.4 * speed));
 		});
@@ -101,6 +115,29 @@ class PlayState extends BeatState
 		}
 
 		super.update(elapsed);
+	}
+
+	function keyCheck():Void
+	{
+		var press:Bool = FlxG.keys.justPressed.ANY;
+
+		if (press)
+		{
+			var rand:Int = FlxG.random.int(0, 5);
+			FlxG.sound.play(Asset.sound('hit$rand'), 0.6);
+		}
+
+		notes.forEach(function(note:Note)
+		{
+			if (note.canHit && !note.hit && press)
+			{
+				note.hit = true;
+
+				note.kill();
+				notes.remove(note);	
+				note.destroy();
+			}
+		});
 	}
 
 	override function beatHit():Void 

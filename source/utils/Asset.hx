@@ -8,7 +8,12 @@ class Asset
 
     public static inline function music(filename:String):String
     {
-        return "assets/music/test" + AUDIO_EXT;
+        return 'assets/music/$filename$AUDIO_EXT';
+    }
+
+    public static inline function sound(filename:String):String
+    {
+        return 'assets/sounds/$filename$AUDIO_EXT';
     }
 
     public static inline function chart(song:String):String

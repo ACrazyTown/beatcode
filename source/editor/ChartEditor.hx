@@ -1,5 +1,6 @@
 package editor;
 
+import props.Note;
 import utils.Util;
 import flixel.math.FlxMath;
 import flixel.FlxObject;
@@ -21,12 +22,17 @@ import states.BeatState;
 
 using StringTools;
 
+typedef ChartSection = 
+{
+    noteTimes:Array<Float>
+}
+
 typedef ChartFile = 
 {
     song:String,
     bpm:Int,
     speed:Float,
-    noteTimes:Array<Float>,
+    sections:Array<ChartSection>,
     chartVersion:String
 }
 
@@ -46,7 +52,9 @@ class ChartEditor extends BeatState
     var strumline:FlxSprite;
 	var infoTxt:FlxText;
     var songStuffText:FlxText;
+
     var griddy:FlxTypedGroup<FlxSprite>;
+    var notes:FlxTypedGroup<Note>;
 
     public function new(chart:ChartFile)
     {
@@ -57,9 +65,14 @@ class ChartEditor extends BeatState
                 song: "Test",
                 bpm: 140,
                 speed: 1,
-				noteTimes: [
-					0, 439, 859, 1299, 1719, 2159, 2579, 3019, 3439, 3859, 4319, 4719, 5159, 5579, 6019, 6439
-				],
+				//noteTimes: [
+				//	0, 439, 859, 1299, 1719, 2159, 2579, 3019, 3439, 3859, 4319, 4719, 5159, 5579, 6019, 6439
+				//],
+                sections: [
+                    {
+                        noteTimes: [0, 439, 859, 1299, 1719, 2159, 2579, 3019, 3439, 3859, 4319, 4719, 5159, 5579, 6019, 6439]
+                    }
+                ],
                 chartVersion: "0.1_haxejam"
             }
         }
@@ -94,6 +107,9 @@ class ChartEditor extends BeatState
 
 		griddy = new FlxTypedGroup<FlxSprite>();
 		add(griddy);
+
+        notes = new FlxTypedGroup<Note>();
+        add(notes);
 
         createGrid();
 
@@ -149,6 +165,8 @@ class ChartEditor extends BeatState
             changeNote(-1);
         if (FlxG.keys.justPressed.RIGHT)
             changeNote(1);
+        if (FlxG.keys.justPressed.ENTER)
+            editNote();
         if (FlxG.keys.justPressed.SPACE)
             toggleMusic();
 
@@ -159,7 +177,8 @@ class ChartEditor extends BeatState
 		}
 
         Conductor.songPosition = FlxG.sound.music.time;
-		strumline.x = 120 + (((gridSize * sectionSize) / (FlxG.sound.music.length / Conductor.songPosition)) % Conductor.crochet * 4) % (gridSize * sectionSize);
+		//strumline.x = 120 + (((gridSize * sectionSize) / (FlxG.sound.music.length / Conductor.songPosition)) % Conductor.crochet * 4) % (gridSize * sectionSize);
+		strumline.x = 120 + (((gridSize * sectionSize) / (Conductor.crochet / FlxG.sound.music.time)) * CHART.speed / sectionSize) % (gridSize * sectionSize);
         updateTexts();
         super.update(elapsed);
     }
@@ -179,6 +198,20 @@ class ChartEditor extends BeatState
                     CHART.speed = nums.value;
             }
         }
+    }
+
+    function editNote():Void
+    {
+        var sectionData:ChartSection = CHART.sections[curSection];
+
+        
+
+        if (sectionData.noteTimes[curNoteIndex] == -1)
+			sectionData.noteTimes[curNoteIndex] = FlxMath.remapToRange(120 + (gridSize * curNoteIndex), 0, 120 + (gridSize * sectionSize), 0, FlxG.sound.music.length);//120 + (gridSize * curNoteIndex);
+        else
+			sectionData.noteTimes[curNoteIndex] = -1;
+        
+        renderNotes();
     }
 
     var curSection:Int = 0;
@@ -205,8 +238,8 @@ class ChartEditor extends BeatState
         curSection += change;
 
         if (curSection < 0)
-            curSection = Math.ceil(CHART.noteTimes.length / sectionSize) - 1;
-		if (curSection > Math.ceil(CHART.noteTimes.length / sectionSize) - 1)
+            curSection = CHART.sections.length - 1;
+		if (curSection > CHART.sections.length - 1)
             curSection = 0;
 
         curNoteIndex = 0;
@@ -217,11 +250,11 @@ class ChartEditor extends BeatState
 
     function renderNotes():Void
     {
-        for (grid in griddy)
+        for (note in notes)
         {
-            grid.kill();
-            griddy.remove(grid);
-            grid.destroy();
+            note.kill();
+            notes.remove(note);
+            note.destroy();
         }
 
         // TODO:
@@ -229,15 +262,24 @@ class ChartEditor extends BeatState
         // dont use this complicated format
         // seperate stuff into sections in the JSON
         // makes it easier to parse And breathe
-        var sectionIndex:Int = (curSection + 1) * sectionSize;
-        var bruhh:Array<Int> = Util.intArray(sectionIndex + 16, sectionIndex);
-        var sectionData:Array<Float> = [];
-        for (bruh in bruhh)
-        {
-            sectionData.push(CHART.noteTimes[bruh]);
-        }
+        // -------------------------------------
+		//120 + ((gridSize * sectionSize) / (Conductor.crochet / note.songTime) % (gridSize * sectionSize);
 
-        trace(sectionData);
+        var sectionData:ChartSection = CHART.sections[curSection];
+        for (i in 0...sectionData.noteTimes.length)
+        {
+            var songTime:Float = sectionData.noteTimes[i];
+            if (songTime == -1) // empty
+                continue;
+
+            var note:Note = new Note(songTime, true);
+            note.setGraphicSize(Std.int(gridSize / 2));
+            note.updateHitbox();
+            note.y = griddy.members[0].y;
+			note.x = (gridSize * sectionSize) / (Conductor.crochet / songTime) / (Conductor.crochet * sectionSize);
+            note.x += 120 + (i * gridSize);
+            notes.add(note);
+        }
     }
 
     function loadSong(song:String):Void

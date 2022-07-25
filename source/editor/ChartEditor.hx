@@ -44,6 +44,7 @@ class ChartEditor extends BeatState
 {
     var _file:FileReference;
     var CHART:ChartFile;
+    var _chartVersion:String = "0.1_haxejam";
 
     var tabMenu:FlxUITabMenu;
     var songGroup:FlxUI;
@@ -78,7 +79,7 @@ class ChartEditor extends BeatState
                         noteTimes: [0, 439, 859, 1299, 1719, 2159, 2579, 3019, 3439, 3859, 4319, 4719, 5159, 5579, 6019, 6439]
                     }
                 ],
-                chartVersion: "0.1_haxejam"
+                chartVersion: _chartVersion
             }
         }
         else
@@ -158,9 +159,28 @@ class ChartEditor extends BeatState
 
         var loadButton:FlxButton = new FlxButton(0, 60, "Load Chart", () -> 
         {
-			var chartPath:String = Asset.chart(songNameText.text); 
+			var chartPath:String = Asset.chart(songName.text); 
             if (!Assets.exists(chartPath))
-                return;
+            {
+				trace(Asset.music(songName.text.toLowerCase()));
+				trace(Assets.exists(Asset.music(songName.text.toLowerCase())));
+                if (!Assets.exists(Asset.music(songName.text.toLowerCase())))
+                    return;
+                
+                loadSong(songName.text);
+                CHART = {
+                    song: songName.text,
+                    bpm: 120,
+                    speed: 1,
+                    sections: [
+                        {
+                            noteTimes: []
+                        }
+                    ],
+                    chartVersion: _chartVersion
+                }
+                renderNotes();
+            }
             else
             {
                 var chart:ChartFile = Json.parse(Assets.getText(chartPath));
@@ -279,11 +299,14 @@ class ChartEditor extends BeatState
 
     function renderNotes():Void
     {
-        for (note in notes)
+        if (notes != null && notes.length > 0)
         {
-            note.kill();
-            notes.remove(note);
-            note.destroy();
+            for (note in notes)
+            {
+                note.kill();
+                notes.remove(note);
+                note.destroy();
+            }
         }
 
         // TODO:
@@ -295,6 +318,13 @@ class ChartEditor extends BeatState
 		//120 + ((gridSize * sectionSize) / (Conductor.crochet / note.songTime) % (gridSize * sectionSize);
 
         var sectionData:ChartSection = CHART.sections[curSection];
+        if (sectionData.noteTimes.length <= 0)
+        {
+            while (sectionData.noteTimes.length < 16)
+                sectionData.noteTimes.push(-1);
+        }
+        trace(sectionData.noteTimes);
+
         for (i in 0...sectionData.noteTimes.length)
         {
             var songTime:Float = sectionData.noteTimes[i];

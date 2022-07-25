@@ -11,6 +11,9 @@ class Note extends FlxSprite
 
     public var canHit:Bool = false;
     public var hit:Bool = false;
+    public var late:Bool = false;
+
+    public var countedMiss:Bool = false;
 
     public function new(songTime:Float = 0, inCharter:Bool = false)
     {
@@ -22,21 +25,27 @@ class Note extends FlxSprite
         this.songTime = songTime;
     }
 
-    var late:Bool = false;
     override function update(elapsed:Float):Void
     {
         super.update(elapsed);
 
-        if (late && color != FlxColor.GRAY)
-            color = FlxColor.GRAY;
-
-		if (songTime < Conductor.songPosition - Conductor.safeZoneOffset && !hit)
-			late = true;
-
-        if (songTime > Conductor.songPosition - Conductor.safeZoneOffset 
-            && songTime < Conductor.songPosition + (Conductor.safeZoneOffset * 0.5))
-            canHit = true;
+        if (songTime > Conductor.songPosition - Conductor.safeZoneOffset)
+        {
+            if (songTime < Conductor.songPosition + Conductor.safeZoneOffset)
+                canHit = true;
+        }
         else
+        {
             canHit = false;
+            late = true;
+        }
+
+        if (late)
+        {
+            if (alpha != 0.4)
+                alpha = 0.4;
+            if (color != FlxColor.GRAY)
+                color = FlxColor.GRAY;
+        }
     }
 }

@@ -20,4 +20,9 @@ class Asset
     {
         return 'assets/data/charts/${song.toLowerCase()}.json';
     }
+
+    public static inline function font(font:String, ?ext:String = ".ttf"):String
+    {
+        return 'assets/fonts/$font$ext';
+    }
 }

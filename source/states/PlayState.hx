@@ -40,7 +40,13 @@ class PlayState extends BeatState
 	var strumline:FlxSprite;
 	var notes:FlxTypedGroup<Note>;
 
+	var bugs:Int = 0;
 	var score:Int = 0;
+	var misses:Int = 0;
+	//accuracy
+	var totalNotes:Int = 0;
+	var totalHit:Int = 0;
+	var accuracy:Float = 0;
 
 	var statsTxt:FlxText;
 
@@ -65,7 +71,8 @@ class PlayState extends BeatState
 		notes = new FlxTypedGroup<Note>();
 		add(notes);
 
-		statsTxt = new FlxText(0, 0, 0, 'Score: $score', 18);
+		statsTxt = new FlxText(0, 0, 0, 'SCORE: $score ~ MISSES: $misses ~ ACCURACY: $accuracy', 24);
+		statsTxt.font = "FORCED SQUARE";
 		statsTxt.y = (FlxG.height - statsTxt.height) - 5;
 		statsTxt.screenCenter(X);
 		add(statsTxt);
@@ -78,7 +85,6 @@ class PlayState extends BeatState
 	{
 		// daNote.y = (strumLine.y - (Conductor.songPosition - daNote.strumTime) * (0.45 * FlxMath.roundDecimal(SONG.speed, 2)));
 		// ermm,,, clean up
-		keyCheck();
 
 		if (songStarting)
 		{
@@ -97,7 +103,9 @@ class PlayState extends BeatState
 		
 		notes.forEachAlive(function(note:Note)
 		{
-			if ((FlxG.width + note.width) < note.x && note.isOnScreen(FlxG.camera))
+			if (note.late && !note.hit && !note.countedMiss)
+				noteMiss(note);
+			if (note.x > (FlxG.width + note.width) && !note.isOnScreen(FlxG.camera))
 			{
 				note.kill();
 				notes.remove(note);
@@ -107,13 +115,17 @@ class PlayState extends BeatState
 			note.x = (strumline.x + (Conductor.songPosition - note.songTime) * (0.4 * speed));
 		});
 
+		#if debug
 		if (FlxG.keys.justPressed.R)
 		{
-			if (FlxG.sound.music.playing)
+			if (FlxG.sound.music != null && FlxG.sound.music.playing)
 				FlxG.sound.music.stop();
 			FlxG.resetState();
 		}
+		#end
 
+		keyCheck();
+		updateStats();
 		super.update(elapsed);
 	}
 
@@ -129,20 +141,36 @@ class PlayState extends BeatState
 
 		notes.forEach(function(note:Note)
 		{
-			if (note.canHit && !note.hit && press)
+			if (press)
 			{
-				note.hit = true;
+				if (note.canHit && !note.hit && !note.late)
+				{
+					note.hit = true;
 
-				note.kill();
-				notes.remove(note);	
-				note.destroy();
+					note.kill();
+					notes.remove(note);	
+					note.destroy();
+				}
 			}
 		});
 	}
 
-	override function beatHit():Void 
+	function noteHit():Void
 	{
-		trace('beat$curBeat | time${FlxG.sound.music.time}');
+	}
+
+	function noteMiss(note:Note):Void
+	{
+		note.countedMiss = true;
+		misses++;
+
+		FlxG.sound.play(Asset.sound("bruh"), 0.6);
+	}
+
+	function updateStats():Void
+	{
+		statsTxt.text = 'SCORE: $score ~ MISSES: $misses ~ ACCURACY: $accuracy';
+		statsTxt.screenCenter(X);
 	}
 
 	function songStart():Void

@@ -13,32 +13,17 @@ class BeatState extends FlxUIState
 	private var curStep:Int = 0;
 	private var curBeat:Int = 0;
 
-	override function create():Void
-	{
-		super.create();
-	}
-
 	override function update(elapsed:Float):Void
 	{
 		var oldStep:Int = curStep;
 
-		updateCurStep();
-		updateBeat();
+		curStep = Math.floor((Conductor.songPosition) / Conductor.stepCrochet);
+		curBeat = Math.floor(curStep / 4);
 
 		if (oldStep != curStep && curStep > 0)
 			stepHit();
 
 		super.update(elapsed);
-	}
-
-	private function updateBeat():Void
-	{
-		curBeat = Math.floor(curStep / 4);
-	}
-
-	private function updateCurStep():Void
-	{
-		curStep = Math.floor((Conductor.songPosition) / Conductor.stepCrochet);
 	}
 
 	public function stepHit():Void

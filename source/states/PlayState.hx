@@ -1,5 +1,7 @@
 package states;
 
+import utils.Util;
+import flixel.math.FlxMath;
 import flixel.text.FlxText;
 import haxe.Json;
 import editor.ChartEditor.ChartFile;
@@ -34,7 +36,10 @@ source/states/PlayState.hx:25: beat15 | time6439
 
 class PlayState extends BeatState
 {
+	var _chart:ChartFile;
+
 	var curSong:String = "Test";
+	var difficulty:Int = 1;
 	var speed:Float = 1;
 
 	var strumline:FlxSprite;
@@ -48,6 +53,7 @@ class PlayState extends BeatState
 	var totalHit:Int = 0;
 	var accuracy:Float = 0;
 
+	var bugsTxt:FlxText;
 	var statsTxt:FlxText;
 
 	public function new(?song:String):Void
@@ -61,8 +67,6 @@ class PlayState extends BeatState
 	{
 		super.create();
 
-		FlxG.fixedTimestep = false;
-
 		strumline = new FlxSprite().makeGraphic(10, FlxG.height);
 		strumline.x = (FlxG.width - strumline.width) - 75;
 		strumline.alpha = 0.5;
@@ -71,13 +75,25 @@ class PlayState extends BeatState
 		notes = new FlxTypedGroup<Note>();
 		add(notes);
 
-		statsTxt = new FlxText(0, 0, 0, 'SCORE: $score ~ MISSES: $misses ~ ACCURACY: $accuracy', 24);
+		statsTxt = new FlxText(0, 0, 0, 'SCORE: $score ~ MISSES: $misses ~ ACCURACY: $accuracy', 20);
 		statsTxt.font = "FORCED SQUARE";
 		statsTxt.y = (FlxG.height - statsTxt.height) - 5;
 		statsTxt.screenCenter(X);
 		add(statsTxt);
 
+		trace('this game will have $bugs BUGS!!!');
+		bugsTxt = new FlxText(0, 0, 0, 'BUGS: $bugs', 24);
+		bugsTxt.color = 0xFFFF9D96;
+		bugsTxt.font = "FORCED SQUARE";
+		bugsTxt.y = (statsTxt.y - bugsTxt.height) - 5;
+		bugsTxt.screenCenter(X);
+		add(bugsTxt);
+
 		loadSong(curSong);
+		
+		bugs = Util.getBugAmount(difficulty, _chart);
+		bugsTxt.text = 'BUGS: $bugs';
+
 		countdown();
 	}
 
@@ -105,6 +121,7 @@ class PlayState extends BeatState
 		{
 			if (note.late && !note.hit && !note.countedMiss)
 				noteMiss(note);
+
 			if (note.x > (FlxG.width + note.width) && !note.isOnScreen(FlxG.camera))
 			{
 				note.kill();
@@ -144,19 +161,21 @@ class PlayState extends BeatState
 			if (press)
 			{
 				if (note.canHit && !note.hit && !note.late)
-				{
-					note.hit = true;
-
-					note.kill();
-					notes.remove(note);	
-					note.destroy();
-				}
+					noteHit(note);
 			}
 		});
 	}
 
-	function noteHit():Void
+	function noteHit(note:Note):Void
 	{
+		note.hit = true;
+
+		totalNotes++;
+		totalHit++;
+
+		note.kill();
+		notes.remove(note);
+		note.destroy();
 	}
 
 	function noteMiss(note:Note):Void
@@ -164,12 +183,16 @@ class PlayState extends BeatState
 		note.countedMiss = true;
 		misses++;
 
+		totalNotes++;
+
 		FlxG.sound.play(Asset.sound("bruh"), 0.6);
 	}
 
 	function updateStats():Void
 	{
-		statsTxt.text = 'SCORE: $score ~ MISSES: $misses ~ ACCURACY: $accuracy';
+		accuracy = FlxMath.roundDecimal((totalHit / totalNotes) * 100, 2);
+
+		statsTxt.text = 'SCORE: $score ~ MISSES: $misses ~ ACCURACY: ${Math.isNaN(accuracy) ? "N/A" : Std.string(accuracy) + "%"}';
 		statsTxt.screenCenter(X);
 	}
 
@@ -199,14 +222,13 @@ class PlayState extends BeatState
 
 	function loadSong(song:String):Void
 	{
-		trace(song);
-		var sd:ChartFile = Json.parse(Assets.getText(Asset.chart(song.toLowerCase())));
+		_chart = Json.parse(Assets.getText(Asset.chart(song.toLowerCase())));
 
-		curSong = sd.song;
-		Conductor.changeBPM(sd.bpm);
-		speed = sd.speed;
+		curSong = _chart.song;
+		Conductor.changeBPM(_chart.bpm);
+		speed = _chart.speed;
 
-		for (section in sd.sections)
+		for (section in _chart.sections)
 		{
 			for (noteTime in section.noteTimes)
 			{

@@ -138,6 +138,10 @@ class ChartEditor extends BeatState
         bpmStepper.value = Conductor.bpm;
         bpmStepper.name = "song_bpm";
 
+        var zoomText:FlxUIText = new FlxUIText(10, 145, 0, "Zoom");
+        var zoomStepper:FlxUINumericStepper = new FlxUINumericStepper(10, 160, 0.1, 16, 1, 16, 1);
+        zoomStepper.name = "editor_zoom";
+
         var speedText:FlxUIText = new FlxUIText(10, 90, 0, "Speed", 8);
         var speedStepper:FlxUINumericStepper = new FlxUINumericStepper(10, 105, 0.1, CHART.speed, 0.1, 10, 1);
         speedStepper.name = "song_speed";
@@ -247,8 +251,16 @@ class ChartEditor extends BeatState
                     Conductor.changeBPM(CHART.bpm);
                 case "song_speed":
                     CHART.speed = nums.value;
+                case "editor_zoom":
+                    zoomShit(nums.value);
+                    
             }
         }
+    }
+
+    function zoomShit(zoom:Float = 0):Void
+    {
+
     }
 
     function editNote():Void

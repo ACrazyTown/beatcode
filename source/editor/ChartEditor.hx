@@ -26,12 +26,12 @@ import states.BeatState;
 
 using StringTools;
 
-typedef ChartSection = 
+typedef ChartSection =
 {
     noteTimes:Array<Float>
 }
 
-typedef ChartFile = 
+typedef ChartFile =
 {
     song:String,
     bpm:Int,
@@ -60,13 +60,15 @@ class ChartEditor extends BeatState
     var songStuffText:FlxText;
 
     var griddy:FlxTypedGroup<FlxSprite>;
-    var notes:FlxTypedGroup<Note>;
+	var notes:FlxTypedGroup<Note>;
+
+	var zoom:Int = 2;
 
     public function new(chart:ChartFile)
     {
         if (chart == null)
         {
-            this.CHART = 
+            this.CHART =
             {
                 song: "Test",
                 bpm: 140,
@@ -139,14 +141,14 @@ class ChartEditor extends BeatState
         bpmStepper.name = "song_bpm";
 
         var zoomText:FlxUIText = new FlxUIText(10, 145, 0, "Zoom");
-        var zoomStepper:FlxUINumericStepper = new FlxUINumericStepper(10, 160, 0.1, 16, 1, 16, 1);
+		var zoomStepper:FlxUINumericStepper = new FlxUINumericStepper(10, 160, 2, 16, 1, 16);
         zoomStepper.name = "editor_zoom";
 
         var speedText:FlxUIText = new FlxUIText(10, 90, 0, "Speed", 8);
         var speedStepper:FlxUINumericStepper = new FlxUINumericStepper(10, 105, 0.1, CHART.speed, 0.1, 10, 1);
         speedStepper.name = "song_speed";
 
-        var saveButton:FlxButton = new FlxButton(0, 45, "Save Chart", () -> 
+        var saveButton:FlxButton = new FlxButton(0, 45, "Save Chart", () ->
         {
             FlxG.save.data.chartSave = Json.stringify(CHART);
             FlxG.save.flush();
@@ -161,16 +163,16 @@ class ChartEditor extends BeatState
         });
         saveButton.x = (tabMenu.width - saveButton.width) - 5;
 
-        var loadButton:FlxButton = new FlxButton(0, 60, "Load Chart", () -> 
+        var loadButton:FlxButton = new FlxButton(0, 60, "Load Chart", () ->
         {
-			var chartPath:String = Asset.chart(songName.text); 
+			var chartPath:String = Asset.chart(songName.text);
             if (!Assets.exists(chartPath))
             {
 				trace(Asset.music(songName.text.toLowerCase()));
 				trace(Assets.exists(Asset.music(songName.text.toLowerCase())));
                 if (!Assets.exists(Asset.music(songName.text.toLowerCase())))
                     return;
-                
+
                 loadSong(songName.text);
                 CHART = {
                     song: songName.text,
@@ -204,12 +206,14 @@ class ChartEditor extends BeatState
         songGroup.add(speedStepper);
         songGroup.add(saveButton);
         songGroup.add(loadButton);
+		songGroup.add(zoomText);
+		songGroup.add(zoomStepper);
 
         tabMenu.add(songGroup);
     }
 
     override function update(elapsed:Float):Void
-    {  
+    {
         if (FlxG.keys.justPressed.A)
             changeSection(-1);
         if (FlxG.keys.justPressed.D)
@@ -233,7 +237,7 @@ class ChartEditor extends BeatState
 
         Conductor.songPosition = FlxG.sound.music.time;
 		//strumline.x = 120 + (((gridSize * sectionSize) / (FlxG.sound.music.length / Conductor.songPosition)) % Conductor.crochet * 4) % (gridSize * sectionSize);
-		strumline.x = 120 + (((gridSize * sectionSize) / (Conductor.crochet / FlxG.sound.music.time)) * CHART.speed / sectionSize) % (gridSize * sectionSize);
+		strumline.x = 120 + (((gridSize * sectionSize) * (FlxG.sound.music.time / Conductor.crochet * zoom)) * CHART.speed / sectionSize) % (gridSize * sectionSize);
         updateTexts();
         super.update(elapsed);
     }
@@ -253,7 +257,7 @@ class ChartEditor extends BeatState
                     CHART.speed = nums.value;
                 case "editor_zoom":
                     zoomShit(nums.value);
-                    
+
             }
         }
     }
@@ -271,7 +275,7 @@ class ChartEditor extends BeatState
 			sectionData.noteTimes[curNoteIndex] = Conductor.crochet * curNoteIndex;//120 + (gridSize * curNoteIndex);
         else
 			sectionData.noteTimes[curNoteIndex] = -1;
-        
+
         renderNotes();
     }
 
@@ -286,7 +290,7 @@ class ChartEditor extends BeatState
         if (curNoteIndex > sectionSize-1)
             curNoteIndex = 0;
 
-        griddy.forEach((spr:FlxSprite) -> 
+        griddy.forEach((spr:FlxSprite) ->
         {
             spr.alpha = 1;
             if (spr.ID == curNoteIndex)
@@ -347,8 +351,11 @@ class ChartEditor extends BeatState
             note.setGraphicSize(Std.int(gridSize / 2));
             note.updateHitbox();
             note.y = griddy.members[0].y;
-			note.x = (gridSize * sectionSize) / (Conductor.crochet / songTime) / (Conductor.crochet * sectionSize);
-            note.x += 120 + (i * gridSize);
+			// strumline.x = 120 + (((gridSize * sectionSize) * (FlxG.sound.music.time / Conductor.crochet * zoom)) * CHART.speed / sectionSize) % (gridSize * sectionSize);
+			note.x = (gridSize * sectionSize) / ((Conductor.crochet / songTime) * zoom) / (Conductor.crochet * sectionSize);
+			//note.x = (gridSize * sectionSize) / (zoom / songTime);
+            note.x += 120 + (i * gridSize * zoom);
+            //note.x *= 2;
             notes.add(note);
         }
     }
@@ -381,7 +388,7 @@ class ChartEditor extends BeatState
             time = FlxG.sound.music.time;
 		infoTxt.text = 'curStep: $curStep\ncurBeat: $curBeat\nTime: ${time}ms\n';
 		//infoTxt.x = (FlxG.width - infoTxt.width) - 5;
-        
+
 		songStuffText.text = 'Song: ${CHART.song}\nBPM: ${CHART.bpm}\nSpeed: ${CHART.speed}\n';
 		//songStuffText.x = (infoTxt.x - songStuffText.width) - 5;
     }
@@ -391,7 +398,7 @@ class ChartEditor extends BeatState
         for (i in 0...sectionSize)
         {
             var color:FlxColor = gridColors[1];
-            if (i % 2 == 0) 
+            if (i % 2 == 0)
                 color = gridColors[0];
             var grid:FlxSprite = new FlxSprite(i * gridSize, 0).makeGraphic(gridSize, gridSize, color);
             grid.screenCenter(Y);

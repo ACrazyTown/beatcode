@@ -1,5 +1,9 @@
 package states;
 
+import props.ShakeableText;
+import haxe.Json;
+import editor.ChartEditor.ChartFile;
+import openfl.Assets;
 import flixel.util.FlxTimer;
 import props.Note;
 import flixel.group.FlxGroup.FlxTypedGroup;
@@ -30,8 +34,18 @@ source/states/PlayState.hx:25: beat15 | time6439
 
 class PlayState extends BeatState
 {
+	var curSong:String = "Test";
+	var speed:Float = 1;
+
 	var strumline:FlxSprite;
 	var notes:FlxTypedGroup<Note>;
+
+	public function new(?song:String):Void
+	{
+		if (song != null)
+			curSong = song;
+		super();
+	}
 
 	override public function create():Void
 	{
@@ -47,11 +61,11 @@ class PlayState extends BeatState
 		notes = new FlxTypedGroup<Note>();
 		add(notes);
 
-		generateTest();
+		//generateTest();
+		loadSong(curSong);
 		countdown();
 	}
 
-	var speed:Int = 1;
 	override public function update(elapsed:Float):Void
 	{
 		// daNote.y = (strumLine.y - (Conductor.songPosition - daNote.strumTime) * (0.45 * FlxMath.roundDecimal(SONG.speed, 2)));
@@ -116,6 +130,31 @@ class PlayState extends BeatState
 			trace(count);
 			count++;
 		}, 5);
+	}
+
+	function loadSong(song:String):Void
+	{
+		trace(song);
+		var sd:ChartFile = Json.parse(Assets.getText(Asset.chart(song.toLowerCase())));
+
+		curSong = sd.song;
+		Conductor.changeBPM(sd.bpm);
+		speed = sd.speed;
+
+		for (section in sd.sections)
+		{
+			for (noteTime in section.noteTimes)
+			{
+				if (noteTime == -1)
+					continue;
+
+				var note:Note = new Note(noteTime);
+				note.screenCenter(Y);
+				notes.add(note);
+			}
+		}
+
+		trace("Generated Song?");
 	}
 
 	function generateTest():Void

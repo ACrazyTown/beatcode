@@ -1,5 +1,9 @@
 package editor;
 
+import openfl.Assets;
+import openfl.events.Event;
+import openfl.events.IOErrorEvent;
+import openfl.net.FileReference;
 import props.Note;
 import utils.Util;
 import flixel.math.FlxMath;
@@ -38,6 +42,7 @@ typedef ChartFile =
 
 class ChartEditor extends BeatState
 {
+    var _file:FileReference;
     var CHART:ChartFile;
 
     var tabMenu:FlxUITabMenu;
@@ -136,14 +141,33 @@ class ChartEditor extends BeatState
         var speedStepper:FlxUINumericStepper = new FlxUINumericStepper(10, 105, 0.1, CHART.speed, 0.1, 10, 1);
         speedStepper.name = "song_speed";
 
-        var saveButton:FlxButton = new FlxButton(0, 45, "Save", () -> 
+        var saveButton:FlxButton = new FlxButton(0, 45, "Save Chart", () -> 
         {
             FlxG.save.data.chartSave = Json.stringify(CHART);
             FlxG.save.flush();
 
-            // file reference
+            var _chart:String = Json.stringify(CHART, "\t");
+
+            _file = new FileReference();
+			_file.addEventListener(Event.COMPLETE, onSaveComplete);
+			_file.addEventListener(Event.CANCEL, onSaveCancel);
+			_file.addEventListener(IOErrorEvent.IO_ERROR, onSaveError);
+			_file.save(_chart.trim(), '${CHART.song.toLowerCase()}.json');
         });
         saveButton.x = (tabMenu.width - saveButton.width) - 5;
+
+        var loadButton:FlxButton = new FlxButton(0, 60, "Load Chart", () -> 
+        {
+			var chartPath:String = Asset.chart(songNameText.text); 
+            if (!Assets.exists(chartPath))
+                return;
+            else
+            {
+                var chart:ChartFile = Json.parse(Assets.getText(chartPath));
+                FlxG.switchState(new ChartEditor(chart));
+            }
+        });
+        loadButton.x = saveButton.x;
 
         songGroup = new FlxUI(null, tabMenu);
         songGroup.name = "Song";
@@ -155,16 +179,23 @@ class ChartEditor extends BeatState
         songGroup.add(speedText);
         songGroup.add(speedStepper);
         songGroup.add(saveButton);
+        songGroup.add(loadButton);
 
         tabMenu.add(songGroup);
     }
 
     override function update(elapsed:Float):Void
-    {
+    {  
+        if (FlxG.keys.justPressed.A)
+            changeSection(-1);
+        if (FlxG.keys.justPressed.D)
+            changeSection(1);
+
         if (FlxG.keys.justPressed.LEFT)
             changeNote(-1);
         if (FlxG.keys.justPressed.RIGHT)
             changeNote(1);
+
         if (FlxG.keys.justPressed.ENTER)
             editNote();
         if (FlxG.keys.justPressed.SPACE)
@@ -204,10 +235,8 @@ class ChartEditor extends BeatState
     {
         var sectionData:ChartSection = CHART.sections[curSection];
 
-        
-
         if (sectionData.noteTimes[curNoteIndex] == -1)
-			sectionData.noteTimes[curNoteIndex] = FlxMath.remapToRange(120 + (gridSize * curNoteIndex), 0, 120 + (gridSize * sectionSize), 0, FlxG.sound.music.length);//120 + (gridSize * curNoteIndex);
+			sectionData.noteTimes[curNoteIndex] = Conductor.crochet * curNoteIndex;//120 + (gridSize * curNoteIndex);
         else
 			sectionData.noteTimes[curNoteIndex] = -1;
         
@@ -329,4 +358,30 @@ class ChartEditor extends BeatState
             griddy.add(grid);
         }
     }
+
+	function onSaveComplete(_):Void
+	{
+		_file.removeEventListener(Event.COMPLETE, onSaveComplete);
+		_file.removeEventListener(Event.CANCEL, onSaveCancel);
+		_file.removeEventListener(IOErrorEvent.IO_ERROR, onSaveError);
+		_file = null;
+		trace("SAVED!");
+	}
+
+	function onSaveCancel(_):Void
+	{
+		_file.removeEventListener(Event.COMPLETE, onSaveComplete);
+		_file.removeEventListener(Event.CANCEL, onSaveCancel);
+		_file.removeEventListener(IOErrorEvent.IO_ERROR, onSaveError);
+		_file = null;
+	}
+
+	function onSaveError(_):Void
+	{
+		_file.removeEventListener(Event.COMPLETE, onSaveComplete);
+		_file.removeEventListener(Event.CANCEL, onSaveCancel);
+		_file.removeEventListener(IOErrorEvent.IO_ERROR, onSaveError);
+		_file = null;
+		trace("error saving Oops!");
+	}
 }

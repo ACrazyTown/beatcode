@@ -1,5 +1,6 @@
 package editor;
 
+import states.PlayState;
 import openfl.Assets;
 import openfl.events.Event;
 import openfl.events.IOErrorEvent;
@@ -62,7 +63,7 @@ class ChartEditor extends BeatState
     var griddy:FlxTypedGroup<FlxSprite>;
 	var notes:FlxTypedGroup<Note>;
 
-	var zoom:Int = 2;
+	var zoom:Int = 1;
 
     public function new(chart:ChartFile)
     {
@@ -141,7 +142,7 @@ class ChartEditor extends BeatState
         bpmStepper.name = "song_bpm";
 
         var zoomText:FlxUIText = new FlxUIText(10, 145, 0, "Zoom");
-		var zoomStepper:FlxUINumericStepper = new FlxUINumericStepper(10, 160, 2, 16, 1, 16);
+		var zoomStepper:FlxUINumericStepper = new FlxUINumericStepper(10, 160, 2, 1, 1, 16);
         zoomStepper.name = "editor_zoom";
 
         var speedText:FlxUIText = new FlxUIText(10, 90, 0, "Speed", 8);
@@ -153,6 +154,26 @@ class ChartEditor extends BeatState
             FlxG.save.data.chartSave = Json.stringify(CHART);
             FlxG.save.flush();
 
+            /*
+            // cleanup of GARBAGE
+            for (section in CHART.sections)
+            {
+                var stupid:Int = 0;
+                for (nt in section.noteTimes)
+                {
+                    if (nt == -1)
+                        stupid++;
+                    else
+                        stupid = 0; // there's atleast something?
+                }
+
+                trace(stupid);
+                trace(section.noteTimes.length);
+                if (stupid == section.noteTimes.length)
+                    CHART.sections.remove(section);
+            }
+            */
+
             var _chart:String = Json.stringify(CHART, "\t");
 
             _file = new FileReference();
@@ -163,7 +184,7 @@ class ChartEditor extends BeatState
         });
         saveButton.x = (tabMenu.width - saveButton.width) - 5;
 
-        var loadButton:FlxButton = new FlxButton(0, 60, "Load Chart", () ->
+        var loadButton:FlxButton = new FlxButton(0, 75, "Load Chart", () ->
         {
 			var chartPath:String = Asset.chart(songName.text);
             if (!Assets.exists(chartPath))
@@ -214,6 +235,9 @@ class ChartEditor extends BeatState
 
     override function update(elapsed:Float):Void
     {
+        if (FlxG.keys.justPressed.FIVE)
+            FlxG.switchState(new PlayState(CHART.song));
+
         if (FlxG.keys.justPressed.A)
             changeSection(-1);
         if (FlxG.keys.justPressed.D)
@@ -265,7 +289,7 @@ class ChartEditor extends BeatState
 
     function zoomShit(zoom:Float = 0):Void
     {
-
+        renderNotes();
     }
 
     function editNote():Void
@@ -273,7 +297,7 @@ class ChartEditor extends BeatState
         var sectionData:ChartSection = CHART.sections[curSection];
 
         if (sectionData.noteTimes[curNoteIndex] == -1)
-			sectionData.noteTimes[curNoteIndex] = Conductor.crochet * curNoteIndex;//120 + (gridSize * curNoteIndex);
+			sectionData.noteTimes[curNoteIndex] = Conductor.crochet * ((curSection + 1) * curNoteIndex);//120 + (gridSize * curNoteIndex);
         else
 			sectionData.noteTimes[curNoteIndex] = -1;
 
@@ -303,10 +327,27 @@ class ChartEditor extends BeatState
     {
         curSection += change;
 
+        if (curSection >= 0)
+        {
+            if (CHART.sections[curSection] == null)
+            {
+                CHART.sections[curSection] = {
+                    noteTimes: []
+                }
+
+                while (CHART.sections[curSection].noteTimes.length < 16)
+                    CHART.sections[curSection].noteTimes.push(-1);
+            }
+        }
+
+        trace(curSection);
+
         if (curSection < 0)
             curSection = CHART.sections.length - 1;
 		if (curSection > CHART.sections.length - 1)
             curSection = 0;
+
+		trace(curSection);
 
         curNoteIndex = 0;
         changeNote();
@@ -340,7 +381,6 @@ class ChartEditor extends BeatState
             while (sectionData.noteTimes.length < 16)
                 sectionData.noteTimes.push(-1);
         }
-        trace(sectionData.noteTimes);
 
         for (i in 0...sectionData.noteTimes.length)
         {

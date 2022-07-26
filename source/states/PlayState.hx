@@ -1,5 +1,7 @@
 package states;
 
+import flixel.FlxCamera;
+import utils.Rating;
 import utils.Util;
 import flixel.math.FlxMath;
 import flixel.text.FlxText;
@@ -38,23 +40,32 @@ class PlayState extends BeatState
 {
 	var _chart:ChartFile;
 
-	var curSong:String = "Test";
-	var difficulty:Int = 1;
+	var curSong:String = "Tutorial";
+	var difficulty:Int = 2;
 	var speed:Float = 1;
 
 	var strumline:FlxSprite;
 	var notes:FlxTypedGroup<Note>;
 
+	var rawBugs:Float = 0;
 	var bugs:Int = 0;
 	var score:Int = 0;
 	var misses:Int = 0;
+	// ratings
+	var ratingAmounts:Map<String, Int> = [
+		"bad" => 0,
+		"good" => 0,
+		"amazing" => 0
+	];
 	//accuracy
 	var totalNotes:Int = 0;
-	var totalHit:Int = 0;
+	var totalHit:Float = 0;
 	var accuracy:Float = 0;
 
 	var bugsTxt:FlxText;
 	var statsTxt:FlxText;
+
+	public static var instance:PlayState;
 
 	public function new(?song:String):Void
 	{
@@ -65,15 +76,21 @@ class PlayState extends BeatState
 
 	override public function create():Void
 	{
-		super.create();
+		instance = this;
+
+		var sooz:FlxSprite = new FlxSprite(0, 0, "assets/images/sooz.png");
+		add(sooz);
+		sooz.alpha = 0.5;
+
+		//hud = new FlxCamera();
+		//FlxG.cameras.add(hud, false);
 		// use garagband track
 		strumline = new FlxSprite().makeGraphic(10, FlxG.height);
 		strumline.x = (FlxG.width - strumline.width) - 75;
 		strumline.alpha = 0.5;
 		add(strumline);
 
-		notes = new FlxTypedGroup<Note>();
-		add(notes);
+		loadSong(curSong);
 
 		statsTxt = new FlxText(0, 0, 0, 'SCORE: $score ~ MISSES: $misses ~ ACCURACY: $accuracy', 20);
 		statsTxt.font = "FORCED SQUARE";
@@ -81,7 +98,8 @@ class PlayState extends BeatState
 		statsTxt.screenCenter(X);
 		add(statsTxt);
 
-		trace('this game will have $bugs BUGS!!!');
+		trace('this game will have $rawBugs BUGS!!!');
+		rawBugs = Util.getBugAmount(difficulty, _chart);
 		bugsTxt = new FlxText(0, 0, 0, 'BUGS: $bugs', 24);
 		bugsTxt.color = 0xFFFF9D96;
 		bugsTxt.font = "FORCED SQUARE";
@@ -89,12 +107,12 @@ class PlayState extends BeatState
 		bugsTxt.screenCenter(X);
 		add(bugsTxt);
 
-		loadSong(curSong);
-
-		bugs = Util.getBugAmount(difficulty, _chart);
-		bugsTxt.text = 'BUGS: $bugs';
+		//statsTxt.cameras = [hud];
+		//bugsTxt.cameras = [hud];
 
 		countdown();
+
+		super.create();
 	}
 
 	override public function update(elapsed:Float):Void
@@ -170,8 +188,28 @@ class PlayState extends BeatState
 	{
 		note.hit = true;
 
+		var rating:String = Rating.rate(Conductor.songPosition - note.songTime, note);
+		var ra:Int = ratingAmounts.get(rating.toLowerCase());
+
 		totalNotes++;
-		totalHit++;
+
+		switch (rating.toLowerCase())
+		{
+			//case "bad": totalHit += 0.33;
+			case "bad":
+				rawBugs += 0.1;
+				ratingAmounts.set("bad", ra + 1);
+			case "good": 
+				totalHit += 0.5;
+				rawBugs--;
+				ratingAmounts.set("good", ra + 1);
+			case "amazing": 
+				totalHit++;
+				rawBugs--;
+				ratingAmounts.set("amazing", ra + 1);
+		}
+
+		trace(rating);
 
 		note.kill();
 		notes.remove(note);
@@ -184,6 +222,7 @@ class PlayState extends BeatState
 		misses++;
 
 		totalNotes++;
+		rawBugs += 0.1;
 
 		FlxG.sound.play(Asset.sound("bruh"), 0.6);
 	}
@@ -192,15 +231,23 @@ class PlayState extends BeatState
 	{
 		accuracy = FlxMath.roundDecimal((totalHit / totalNotes) * 100, 2);
 
+		if (rawBugs <= 0)
+			rawBugs = 0;
+
+		bugs = Math.round(rawBugs);
+
 		statsTxt.text = 'SCORE: $score ~ MISSES: $misses ~ ACCURACY: ${Math.isNaN(accuracy) ? "N/A" : Std.string(accuracy) + "%"}';
 		statsTxt.screenCenter(X);
+		bugsTxt.text = 'BUGS: $bugs';
+		bugsTxt.color = (bugs < 1) ? 0xFF96C7FF : 0xFFFF9D96;
+		bugsTxt.screenCenter(X);
 	}
 
 	function songStart():Void
 	{
 		songStarting = false;
 		Conductor.changeBPM(140);
-		FlxG.sound.playMusic(Asset.music("test"), 1, false);
+		FlxG.sound.playMusic(Asset.music(_chart.song.toLowerCase()), 1, false);
 	}
 
 	var counting:Bool = false;
@@ -222,6 +269,9 @@ class PlayState extends BeatState
 
 	function loadSong(song:String):Void
 	{
+		notes = new FlxTypedGroup<Note>();
+		add(notes);
+
 		_chart = Json.parse(Assets.getText(Asset.chart(song.toLowerCase())));
 
 		curSong = _chart.song;
@@ -242,16 +292,5 @@ class PlayState extends BeatState
 		}
 
 		trace("Generated Song?");
-	}
-
-	function generateTest():Void
-	{
-		var times:Array<Int> = [0, 439, 859, 1299, 1719, 2159, 2579, 3019, 3439, 3859, 4319, 4719, 5159, 5579, 6019, 6439];
-		for (time in times)
-		{
-			var note:Note = new Note(time);
-			note.screenCenter(Y);
-			notes.add(note);
-		}
 	}
 }

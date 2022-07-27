@@ -18,4 +18,18 @@ class Rating
 
         return rating;
     }
+
+    public static function getRank():String
+    {
+        return "blah blah blah";
+    }
+
+    static function getAverage(ratingMap:Map<String, Int>):Float
+    {
+        var bad:Int = ratingMap.get("bad");
+        var good:Int = ratingMap.get("good");
+        var amazing:Int = ratingMap.get("amazing");
+
+        return (bad + good + amazing) / 3;
+    }
 }

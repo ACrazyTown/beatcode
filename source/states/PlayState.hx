@@ -17,25 +17,6 @@ import utils.Conductor;
 import utils.Asset;
 import flixel.FlxState;
 
-/*
-beat times
-source/states/PlayState.hx:25: beat1 | time439
-source/states/PlayState.hx:25: beat2 | time859
-source/states/PlayState.hx:25: beat3 | time1299
-source/states/PlayState.hx:25: beat4 | time1719
-source/states/PlayState.hx:25: beat5 | time2159
-source/states/PlayState.hx:25: beat6 | time2579
-source/states/PlayState.hx:25: beat7 | time3019
-source/states/PlayState.hx:25: beat8 | time3439
-source/states/PlayState.hx:25: beat9 | time3859
-source/states/PlayState.hx:25: beat10 | time4319
-source/states/PlayState.hx:25: beat11 | time4719
-source/states/PlayState.hx:25: beat12 | time5159
-source/states/PlayState.hx:25: beat13 | time5579
-source/states/PlayState.hx:25: beat14 | time6019
-source/states/PlayState.hx:25: beat15 | time6439
-*/
-
 class PlayState extends BeatState
 {
 	var _chart:ChartFile;
@@ -52,7 +33,7 @@ class PlayState extends BeatState
 	var score:Int = 0;
 	var misses:Int = 0;
 	// ratings
-	var ratingAmounts:Map<String, Int> = [
+	public var ratingAmounts:Map<String, Int> = [
 		"bad" => 0,
 		"good" => 0,
 		"amazing" => 0
@@ -199,17 +180,21 @@ class PlayState extends BeatState
 			case "bad":
 				rawBugs += 0.1;
 				ratingAmounts.set("bad", ra + 1);
+				
+				score += 75;
 			case "good": 
 				totalHit += 0.5;
 				rawBugs--;
 				ratingAmounts.set("good", ra + 1);
+
+				score += 150;
 			case "amazing": 
 				totalHit++;
 				rawBugs--;
 				ratingAmounts.set("amazing", ra + 1);
+				
+				score += 225;
 		}
-
-		trace(rating);
 
 		note.kill();
 		notes.remove(note);
@@ -248,6 +233,12 @@ class PlayState extends BeatState
 		songStarting = false;
 		Conductor.changeBPM(140);
 		FlxG.sound.playMusic(Asset.music(_chart.song.toLowerCase()), 1, false);
+		FlxG.sound.music.onComplete = songEnd;
+	}
+
+	function songEnd():Void 
+	{
+		super.openSubState(new GameOverSubState());
 	}
 
 	var counting:Bool = false;

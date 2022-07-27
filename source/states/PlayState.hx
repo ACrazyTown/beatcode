@@ -93,6 +93,8 @@ class PlayState extends BeatState
 		bugsTxt.screenCenter(X);
 		add(bugsTxt);
 
+		super.openSubState(new TutorialSubState());
+
 		countdown();
 
 		super.create();

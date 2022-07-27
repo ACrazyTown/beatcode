@@ -17,7 +17,7 @@ class Main extends Sprite
 		state = editor.ChartEditor;
 		#end
 
-		var fps:FPS = new FPS(10, 10, 0xFFFFFFFF);
+		var fps:FPS = new FPS(5, 5, 0xFFFFFFFF);
 		addChild(new FlxGame(0, 0, state));
 		addChild(fps);
 	}

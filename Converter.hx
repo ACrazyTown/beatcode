@@ -60,6 +60,7 @@ class Converter
 			Sys.exit(0);
 		}
 
+		trace("TESTED ON PSYCH ENGINE --- BASE FNF MIGHT NOT WORK!!!");
 		trace("Converting chart...");
 		var fnf:FNFChartFile = Json.parse(File.getContent(path));
 		var bc:BCChartFile = 

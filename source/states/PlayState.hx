@@ -25,26 +25,29 @@ class PlayState extends BeatState
 	var difficulty:Int = 2;
 	var speed:Float = 1;
 
+	public var bg:FlxSprite;
 	var strumline:FlxSprite;
 	var notes:FlxTypedGroup<Note>;
 
 	var rawBugs:Float = 0;
-	var bugs:Int = 0;
-	var score:Int = 0;
-	var misses:Int = 0;
-	// ratings
-	public var ratingAmounts:Map<String, Int> = [
-		"bad" => 0,
-		"good" => 0,
-		"amazing" => 0
-	];
+	public var bugs:Int = 0;
+	
+	public var bestCombo:Int = 0;
+	public var combo:Int = 0;
+	public var score:Int = 0;
+	public var misses:Int = 0;
+
 	//accuracy
+	public var noteAmount:Int = 0; // used for ranking, represents amounts of notes in the song
 	var totalNotes:Int = 0;
 	var totalHit:Float = 0;
 	var accuracy:Float = 0;
 
 	var bugsTxt:FlxText;
 	var statsTxt:FlxText;
+
+	// If it's (almost) impossible to beat a song, this will grant extra bugfixes
+	var desperate:Bool = false;
 
 	public static var instance:PlayState;
 
@@ -59,9 +62,9 @@ class PlayState extends BeatState
 	{
 		instance = this;
 
-		var sooz:FlxSprite = new FlxSprite(0, 0, "assets/images/sooz.png");
-		add(sooz);
-		sooz.alpha = 0.5;
+		bg = new FlxSprite(0, 0, "assets/images/sooz.png");
+		add(bg);
+		bg.alpha = 0.5;
 
 		//hud = new FlxCamera();
 		//FlxG.cameras.add(hud, false);
@@ -79,8 +82,8 @@ class PlayState extends BeatState
 		statsTxt.screenCenter(X);
 		add(statsTxt);
 
-		trace('this game will have $rawBugs BUGS!!!');
 		rawBugs = Util.getBugAmount(difficulty, _chart);
+		trace('this game will have $rawBugs BUGS!!!');
 		bugsTxt = new FlxText(0, 0, 0, 'BUGS: $bugs', 24);
 		bugsTxt.color = 0xFFFF9D96;
 		bugsTxt.font = "FORCED SQUARE";
@@ -138,6 +141,9 @@ class PlayState extends BeatState
 				FlxG.sound.music.stop();
 			FlxG.resetState();
 		}
+
+		if (FlxG.keys.justPressed.ONE)
+			songEnd();
 		#end
 
 		keyCheck();
@@ -170,8 +176,6 @@ class PlayState extends BeatState
 		note.hit = true;
 
 		var rating:String = Rating.rate(Conductor.songPosition - note.songTime, note);
-		var ra:Int = ratingAmounts.get(rating.toLowerCase());
-
 		totalNotes++;
 
 		switch (rating.toLowerCase())
@@ -179,22 +183,16 @@ class PlayState extends BeatState
 			//case "bad": totalHit += 0.33;
 			case "bad":
 				rawBugs += 0.1;
-				ratingAmounts.set("bad", ra + 1);
-				
-				score += 75;
 			case "good": 
 				totalHit += 0.5;
 				rawBugs--;
-				ratingAmounts.set("good", ra + 1);
-
-				score += 150;
 			case "amazing": 
 				totalHit++;
 				rawBugs--;
-				ratingAmounts.set("amazing", ra + 1);
-				
-				score += 225;
 		}
+
+		score += Rating.getMulti(rating);
+		combo++;
 
 		note.kill();
 		notes.remove(note);
@@ -209,6 +207,8 @@ class PlayState extends BeatState
 		totalNotes++;
 		rawBugs += 0.1;
 
+		combo = 0;
+
 		FlxG.sound.play(Asset.sound("bruh"), 0.6);
 	}
 
@@ -218,6 +218,9 @@ class PlayState extends BeatState
 
 		if (rawBugs <= 0)
 			rawBugs = 0;
+
+		if (combo > bestCombo)
+			bestCombo = combo;
 
 		bugs = Math.round(rawBugs);
 
@@ -238,6 +241,14 @@ class PlayState extends BeatState
 
 	function songEnd():Void 
 	{
+		if (FlxG.sound.music != null)
+		{
+			if (FlxG.sound.music.playing)
+				FlxG.sound.music.stop();
+
+			FlxG.sound.music.volume = 0;
+		}
+
 		super.openSubState(new GameOverSubState());
 	}
 
@@ -282,6 +293,7 @@ class PlayState extends BeatState
 			}
 		}
 
+		noteAmount = notes.length;
 		trace("Generated Song?");
 	}
 }

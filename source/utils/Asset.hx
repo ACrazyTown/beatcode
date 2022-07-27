@@ -6,6 +6,11 @@ class Asset
 {
     public static var AUDIO_EXT:String = #if desktop ".ogg" #else ".mp3" #end;
 
+    public static inline function image(filename:String):String
+    {
+        return 'assets/images/$filename.png';
+    }
+
     public static inline function music(filename:String):String
     {
         return 'assets/music/$filename$AUDIO_EXT';

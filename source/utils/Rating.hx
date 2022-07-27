@@ -34,19 +34,19 @@ class Rating
     {
         var ranks:Array<String> = ["A", "B", "C", "D", "F"];
 
-        var min:Int = Std.int(finalScore / ranks.length);
         var max:Int = Std.int(noteAmount * multi.get("amazing"));
+		var min:Int = Std.int(max / ranks.length);
         var index:Int = 0;
 
         if (finalScore <= max && finalScore >= min * 4)
             index = 0;
-        else if (finalScore <= min * 4 && finalScore >= min * 3)
+        else if (finalScore < min * 4 && finalScore >= min * 3)
             index = 1;
-        else if (finalScore <= min * 3 && finalScore >= min * 2)
+        else if (finalScore < min * 3 && finalScore >= min * 2)
             index = 2;
-        else if (finalScore <= min * 2 && finalScore >= min)
+        else if (finalScore < min * 2 && finalScore >= min)
             index = 3;
-        else  if (finalScore < min)
+        else if (finalScore < min)
             index = 4;
 
         return ranks[index];

@@ -1,5 +1,7 @@
 package;
 
+import states.TitleState;
+//import states.IntroState;
 import openfl.display.FPS;
 import states.PlayState;
 import flixel.FlxState;
@@ -12,13 +14,16 @@ class Main extends Sprite
 	{
 		super();
 
-		var state:Class<FlxState> = PlayState;
+		var state:Class<FlxState> = TitleState;
 		#if CHARTER
 		state = editor.ChartEditor;
 		#end
 
-		var fps:FPS = new FPS(5, 5, 0xFFFFFFFF);
 		addChild(new FlxGame(0, 0, state));
+
+		#if debug
+		var fps:FPS = new FPS(5, 5, 0xFFFFFFFF);
 		addChild(fps);
+		#end
 	}
 }

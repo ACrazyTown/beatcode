@@ -21,6 +21,8 @@ class PlayState extends BeatState
 {
 	var _chart:ChartFile;
 
+	public var campaignMode:Bool = true;
+
 	var curSong:String = "Tutorial";
 	var difficulty:Int = 2;
 	var speed:Float = 1;
@@ -41,7 +43,7 @@ class PlayState extends BeatState
 	public var noteAmount:Int = 0; // used for ranking, represents amounts of notes in the song
 	var totalNotes:Int = 0;
 	var totalHit:Float = 0;
-	var accuracy:Float = 0;
+	public var accuracy:Float = 0;
 
 	var bugsTxt:FlxText;
 	var statsTxt:FlxText;
@@ -91,9 +93,6 @@ class PlayState extends BeatState
 		bugsTxt.screenCenter(X);
 		add(bugsTxt);
 
-		//statsTxt.cameras = [hud];
-		//bugsTxt.cameras = [hud];
-
 		countdown();
 
 		super.create();
@@ -116,7 +115,7 @@ class PlayState extends BeatState
 		else
 		{
 			if (FlxG.sound.music != null && FlxG.sound.music.playing)
-				Conductor.songPosition += FlxG.elapsed * 1000;
+				Conductor.songPosition += FlxG.elapsed*1000;
 		}
 		
 		notes.forEachAlive(function(note:Note)
@@ -183,9 +182,12 @@ class PlayState extends BeatState
 			//case "bad": totalHit += 0.33;
 			case "bad":
 				rawBugs += 0.1;
+				totalHit += 0.3;
+
 			case "good": 
-				totalHit += 0.5;
+				totalHit += 0.7;
 				rawBugs--;
+
 			case "amazing": 
 				totalHit++;
 				rawBugs--;
@@ -206,6 +208,7 @@ class PlayState extends BeatState
 
 		totalNotes++;
 		rawBugs += 0.1;
+		score -= Rating.getMulti("bad");
 
 		combo = 0;
 
@@ -216,6 +219,9 @@ class PlayState extends BeatState
 	{
 		accuracy = FlxMath.roundDecimal((totalHit / totalNotes) * 100, 2);
 
+		if (notes.length > bugs)
+			desperate = true;
+		
 		if (rawBugs <= 0)
 			rawBugs = 0;
 
@@ -245,8 +251,6 @@ class PlayState extends BeatState
 		{
 			if (FlxG.sound.music.playing)
 				FlxG.sound.music.stop();
-
-			FlxG.sound.music.volume = 0;
 		}
 
 		super.openSubState(new GameOverSubState());

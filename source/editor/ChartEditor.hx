@@ -1,5 +1,6 @@
 package editor;
 
+import openfl.Lib;
 import states.PlayState;
 import openfl.Assets;
 import openfl.events.Event;
@@ -91,6 +92,7 @@ class ChartEditor extends BeatState
     override function create():Void
     {
         trace("hello from chartering");
+
 		loadSong(CHART.song);
 
         var tabs = [

@@ -79,9 +79,12 @@ class Converter
 		var i:Int = 0;
 		for (section in fnf.song.notes)
 		{
+			if (section.sectionNotes.length <= 0)
+				continue;
+
 			bc.sections.push({noteTimes: []});
 			//fnf.song.notes[i].sectionNotes.sort((a, b) -> a - b); // 0,1,2,3...
-			
+
 			for (notes in section.sectionNotes)
 			{
 				//if (notes[0] < 60000) - Case specific thing when testing : )

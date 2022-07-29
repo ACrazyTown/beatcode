@@ -86,6 +86,7 @@ class GameOverSubState extends FlxSubState
     var realScore:Int = 0;
     var realMiss:Int = 0;
     var realAcc:Float = 0;
+    var realBC:Float = 0;
 
     var statTxt:FlxText;
     var proceedText:FlxTypeText;
@@ -164,7 +165,8 @@ class GameOverSubState extends FlxSubState
             realScore = Std.int(FlxMath.lerp(realScore, ps.score, 0.4));
             realMiss = Std.int(FlxMath.lerp(realMiss, ps.misses, 0.4));
             realAcc = FlxMath.roundDecimal(FlxMath.lerp(realAcc, ps.accuracy, 0.4), 2);
-            statTxt.text = 'Score: $realScore | Misses: $realMiss | Accuracy: $realAcc%';
+            realBC = FlxMath.roundDecimal(FlxMath.lerp(realBC, ps.bestCombo, 0.4), 0) + 1; //I dont even know
+            statTxt.text = 'Score: $realScore | Misses: $realMiss | Accuracy: $realAcc% | Best Combo: $realBC';
             statTxt.screenCenter(X);
         }
 

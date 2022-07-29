@@ -1,5 +1,6 @@
 package states;
 
+import flixel.tweens.FlxTween;
 import flixel.FlxG;
 import utils.Asset;
 import flixel.util.FlxColor;
@@ -19,13 +20,16 @@ class TutorialSubState extends FlxSubState
         "Hitting or missing bad notes increases the bug amount by 0.25"
     ];
     
+	var overlay:FlxSprite;
     var mainText:FlxText;
+
+    var ending:Bool = false;
 
     public function new():Void
     {
         super();
 
-        var overlay:FlxSprite = new FlxSprite().makeGraphic(FlxG.width, FlxG.height, FlxColor.BLACK);
+        overlay = new FlxSprite().makeGraphic(FlxG.width, FlxG.height, FlxColor.BLACK);
         overlay.alpha = 0.75;
         add(overlay);
 
@@ -39,8 +43,11 @@ class TutorialSubState extends FlxSubState
 
     override function update(elapsed:Float):Void
     {
-        if (FlxG.keys.justPressed.ANY)
-            changeCurEvent(1);
+        if (!ending)
+        {
+            if (FlxG.keys.justPressed.ANY)
+                changeCurEvent(1);
+        }
 
         super.update(elapsed);
     }
@@ -55,7 +62,7 @@ class TutorialSubState extends FlxSubState
         if (curEvent < 0)
             curEvent = texts.length - 1;
         if (curEvent > texts.length - 1)
-            curEvent = 0;
+            endTutorial();
 
         executeEvent();
     }
@@ -79,5 +86,21 @@ class TutorialSubState extends FlxSubState
 				arrow.y += 165;
                 add(arrow);
         }
+    }
+
+    function endTutorial():Void
+    {
+        ending = true;
+
+        if (mainText != null && members.contains(mainText))
+        {
+            remove(mainText);
+            mainText.destroy();
+        }
+
+        FlxTween.tween(overlay, {alpha: 0}, 1, {onComplete: function(_:FlxTween)
+        {
+            close();
+        }});
     }
 }

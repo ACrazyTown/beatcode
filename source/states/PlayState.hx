@@ -1,8 +1,9 @@
 package states;
 
+import flixel.graphics.frames.FlxFrame;
+import utils.Game;
 import flixel.FlxCamera;
 import utils.Rating;
-import utils.Util;
 import flixel.math.FlxMath;
 import flixel.text.FlxText;
 import haxe.Json;
@@ -84,7 +85,7 @@ class PlayState extends BeatState
 		statsTxt.screenCenter(X);
 		add(statsTxt);
 
-		rawBugs = Util.getBugAmount(difficulty, _chart);
+		rawBugs = Game.getBugAmount(difficulty, _chart);
 		trace('this game will have $rawBugs BUGS!!!');
 		bugsTxt = new FlxText(0, 0, 0, 'BUGS: $bugs', 24);
 		bugsTxt.color = 0xFFFF9D96;
@@ -104,6 +105,9 @@ class PlayState extends BeatState
 	{
 		// daNote.y = (strumLine.y - (Conductor.songPosition - daNote.strumTime) * (0.45 * FlxMath.roundDecimal(SONG.speed, 2)));
 		// ermm,,, clean up
+
+		if (FlxG.camera.zoom != 1)
+			FlxG.camera.zoom = FlxMath.lerp(FlxG.camera.zoom, 1, 0.15);
 
 		if (songStarting)
 		{
@@ -198,6 +202,8 @@ class PlayState extends BeatState
 		score += Rating.getMulti(rating);
 		combo++;
 
+		FlxG.camera.zoom += 0.035;
+
 		note.kill();
 		notes.remove(note);
 		note.destroy();
@@ -229,6 +235,9 @@ class PlayState extends BeatState
 
 		if (combo > bestCombo)
 			bestCombo = combo;
+
+		trace(combo);
+		trace(bestCombo);
 
 		bugs = Math.round(rawBugs);
 

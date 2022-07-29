@@ -10,7 +10,7 @@ A rhythm game where you fix bugs by slamming your keyboard, made for **[HaxeJam:
 - [DespawnedDiamond](https://twitter.com/despawnedd)
     - Help with silly math for the charter
 
-- [ninjamuffin99](https://twitter.com/ninja_muffin99)
+- [ninjamuffin99 & Funkin' contributors](https://twitter.com/ninja_muffin99)
     - Some stolen code from the Funkin' repo lol!! 
     - Mainly `Conductor` and `BeatState` and those technical rhythm game stuffsies
 

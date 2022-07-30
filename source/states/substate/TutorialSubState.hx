@@ -1,4 +1,4 @@
-package states;
+package states.substate;
 
 import flixel.tweens.FlxTween;
 import flixel.FlxG;
@@ -31,6 +31,7 @@ class TutorialSubState extends FlxSubState
     {
         super();
 
+        trace("Hi felisha");
         overlay = new FlxSprite().makeGraphic(FlxG.width, FlxG.height, FlxColor.BLACK);
         overlay.alpha = 0.75;
         add(overlay);
@@ -93,6 +94,7 @@ class TutorialSubState extends FlxSubState
     function endTutorial():Void
     {
         ending = true;
+        trace("nvm Byae");
 
         if (mainText != null && members.contains(mainText))
         {

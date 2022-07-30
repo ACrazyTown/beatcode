@@ -1,24 +1,22 @@
-package states;
+package states.substate;
 
-import flixel.system.FlxSound;
-import props.ScrollBackground;
+import flixel.FlxG;
+import flixel.FlxSprite;
+import flixel.FlxSubState;
 import flixel.addons.text.FlxTypeText;
+import flixel.group.FlxGroup;
 import flixel.math.FlxMath;
-import flixel.system.macros.FlxMacroUtil;
+import flixel.system.FlxSound;
 import flixel.system.FlxSplash;
 import flixel.text.FlxText;
-import lime.graphics.ImageBuffer;
-import flixel.group.FlxGroup;
-import flixel.util.FlxTimer;
-import utils.Asset;
-import flixel.FlxSprite;
-import flixel.util.FlxColor;
-import props.DotText;
 import flixel.tweens.FlxEase;
-import flixel.FlxG;
 import flixel.tweens.FlxTween;
+import flixel.util.FlxColor;
+import flixel.util.FlxTimer;
+import props.DotText;
+import props.ScrollBackground;
+import utils.Asset;
 import utils.Rating;
-import flixel.FlxSubState;
 
 class GameOverSubState extends FlxSubState
 {
@@ -111,9 +109,8 @@ class GameOverSubState extends FlxSubState
     {
         remove(dTxt);
 
-        FlxG.sound.play(Asset.sound("boo_womp"), 0.8);
-
-        var passed:Bool = (ps.bugs <= 0);
+		var passed:Bool = (ps.bugs <= 0);
+        FlxG.sound.play(Asset.sound(passed ? "tada" : "boo_womp"), 0.8);
 
         var resTxt:FlxText = new FlxText(dTxt.x, dTxt.y, 0, passed ? "Compiled successfully!" : "ERROR: Song failed!", dTxt.size);
         resTxt.font = "Modern DOS 8x16";

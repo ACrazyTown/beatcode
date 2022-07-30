@@ -1,5 +1,12 @@
 package states;
 
+import flixel.math.FlxRect;
+import flixel.math.FlxPoint;
+import flixel.graphics.FlxGraphic;
+import flixel.addons.transition.FlxTransitionSprite.GraphicTransTileDiamond;
+import flixel.addons.transition.TransitionData;
+import flixel.addons.transition.FlxTransitionableState;
+import utils.Game;
 import props.ScrollBackground;
 import lime.app.Application;
 import flixel.FlxG;
@@ -10,10 +17,10 @@ import utils.Asset;
 import flixel.FlxSprite;
 import flixel.FlxState;
 
-class TitleState extends FlxState
+class TitleState extends FlxTransitionableState
 {
     var optionGroup:FlxTypedGroup<FlxText>;
-    var options:Array<String> = ["Campaign", "Freeplay", "Options"];
+    var options:Array<String> = #if !debug ["Campaign", "Freeplay", "Options"] #else ["Freeplay"] #end;
     var curSelected:Int = 0;
 
 	var logo:FlxSprite;
@@ -22,6 +29,20 @@ class TitleState extends FlxState
 
     override function create():Void
     {
+        if (!Game.initTransition)
+        {
+			var diamond:FlxGraphic = FlxGraphic.fromClass(GraphicTransTileDiamond);
+			diamond.persist = true;
+
+			FlxTransitionableState.defaultTransIn = new TransitionData(FADE, FlxColor.BLACK, 0.7, new FlxPoint(0, -1), {asset: diamond, width: 32, height: 32},
+				new FlxRect(-200, -200, FlxG.width * 1.4, FlxG.height * 1.4));
+			FlxTransitionableState.defaultTransOut = new TransitionData(FADE, FlxColor.BLACK, 0.4, new FlxPoint(0, 1),
+				{asset: diamond, width: 32, height: 32}, new FlxRect(-200, -200, FlxG.width * 1.4, FlxG.height * 1.4));
+
+			transIn = FlxTransitionableState.defaultTransIn;
+			transOut = FlxTransitionableState.defaultTransOut;
+        }
+
 		var bg:ScrollBackground = new ScrollBackground(FlxG.width, FlxG.height, 0xFF163a82, 15, 15, 0xFF3ea6cf);
         add(bg);
 
@@ -71,7 +92,11 @@ class TitleState extends FlxState
 
     function accept():Void
     {
-        FlxG.switchState(new PlayState("Tutorial"));
+        switch (options[curSelected])
+        {
+			case "Campaign": FlxG.switchState(new PlayState("Tutorial"));
+            case "Freeplay": FlxG.switchState(new FreeplayState());
+        }
     }
 
     function changeSelection(change:Int = 0):Void

@@ -8,7 +8,7 @@ A rhythm game where you fix bugs by slamming your keyboard, made for **[HaxeJam:
     - Programming, Art & Music.
 
 - [DespawnedDiamond](https://twitter.com/despawnedd)
-    - Help with silly math for the charter
+    - Help with silly math for the charter & Music
 
 - [ninjamuffin99 & Funkin' contributors](https://twitter.com/ninja_muffin99)
     - Some stolen code from the Funkin' repo lol!! 

@@ -1,5 +1,6 @@
 package states;
 
+import flixel.addons.transition.FlxTransitionableState;
 import flixel.FlxG;
 import flixel.FlxState;
 
@@ -9,7 +10,7 @@ typedef OptionData =
     property:Dynamic
 }
 
-class OptionsState extends FlxState
+class OptionsState extends FlxTransitionableState
 {
     var options:Array<OptionData> = [
         {name: "sus", property: FlxG}

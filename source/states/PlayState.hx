@@ -1,5 +1,11 @@
 package states;
 
+import flixel.tweens.FlxTween;
+import flixel.util.FlxColor;
+import states.substate.GameOverSubState;
+import states.substate.TutorialSubState;
+import states.substate.PauseSubState;
+import flixel.FlxSubState;
 import flixel.input.keyboard.FlxKey;
 import flixel.graphics.frames.FlxFrame;
 import utils.Game;
@@ -23,14 +29,20 @@ class PlayState extends BeatState
 {
 	var _chart:ChartFile;
 
-	public var campaignMode:Bool = true;
+	public var campaignMode:Bool = false;
+	public var campaignList:Array<String> = [
+		"Tutorial",
+		"Syntax"
+	];
 
-	var curSong:String = "Tutorial";
+	static var curSong:String = "Tutorial";
 	var difficulty:Int = 2;
 	var speed:Float = 1;
 
 	public var bg:FlxSprite;
 	var strumline:FlxSprite;
+	
+	var noteUnderlay:FlxSprite;
 	var notes:FlxTypedGroup<Note>;
 
 	var rawBugs:Float = 0;
@@ -51,6 +63,7 @@ class PlayState extends BeatState
 	var statsTxt:FlxText;
 
 	// If it's (almost) impossible to beat a song, this will grant extra bugfixes
+	var actualNoteLength:Int = 0; // notes.length doesnt update for some reason
 	var desperate:Bool = false;
 
 	public static var instance:PlayState;
@@ -70,15 +83,12 @@ class PlayState extends BeatState
 		add(bg);
 		bg.alpha = 0.5;
 
-		//hud = new FlxCamera();
-		//FlxG.cameras.add(hud, false);
-		// use garagband track
+		loadSong(curSong);
+
 		strumline = new FlxSprite().makeGraphic(10, FlxG.height);
 		strumline.x = (FlxG.width - strumline.width) - 75;
 		strumline.alpha = 0.5;
 		add(strumline);
-
-		loadSong(curSong);
 
 		statsTxt = new FlxText(0, 0, 0, 'SCORE: $score ~ MISSES: $misses ~ ACCURACY: $accuracy', 20);
 		statsTxt.font = "FORCED SQUARE";
@@ -95,10 +105,9 @@ class PlayState extends BeatState
 		bugsTxt.screenCenter(X);
 		add(bugsTxt);
 
-		super.openSubState(new TutorialSubState());
+		//openSubState(new TutorialSubState());
 
 		countdown();
-
 		super.create();
 	}
 
@@ -106,6 +115,8 @@ class PlayState extends BeatState
 	{
 		// daNote.y = (strumLine.y - (Conductor.songPosition - daNote.strumTime) * (0.45 * FlxMath.roundDecimal(SONG.speed, 2)));
 		// ermm,,, clean up
+
+		FlxG.watch.addQuick("desperate", desperate);
 
 		if (FlxG.camera.zoom != 1)
 			FlxG.camera.zoom = FlxMath.lerp(FlxG.camera.zoom, 1, 0.15);
@@ -135,6 +146,7 @@ class PlayState extends BeatState
 				note.kill();
 				notes.remove(note);
 				note.destroy();
+				actualNoteLength--;
 			}
 
 			note.x = (strumline.x + (Conductor.songPosition - note.songTime) * (0.4 * speed));
@@ -167,7 +179,8 @@ class PlayState extends BeatState
 				return;
 
 			case FlxKey.ESCAPE:
-				trace("");
+				super.openSubState(new PauseSubState());
+				return;
 		}
 
 		var press:Bool = FlxG.keys.anyJustPressed([keyCode]);
@@ -182,8 +195,17 @@ class PlayState extends BeatState
 		{
 			if (press)
 			{
-				if (note.canHit && !note.hit && !note.late)
-					noteHit(note);
+				if (note.canHit)
+				{
+					if (!note.hit && !note.late)
+						noteHit(note);
+				}
+				else
+				{
+					//trace((Game.getClosestNote(notes.members, FlxG.sound.music.time)));
+					//noteMiss(notes.members[Game.getClosestNote(notes.members, FlxG.sound.music.time)]);
+					//noteMiss(notes.getFirstAlive());
+				}
 			}
 		});
 	}
@@ -200,10 +222,10 @@ class PlayState extends BeatState
 			//case "bad": totalHit += 0.33;
 			case "bad":
 				rawBugs += 0.1;
-				totalHit += 0.3;
+				totalHit += 0.5;
 
 			case "good": 
-				totalHit += 0.7;
+				totalHit += 0.8;
 				rawBugs--;
 
 			case "amazing": 
@@ -211,6 +233,8 @@ class PlayState extends BeatState
 				rawBugs--;
 		}
 
+		if (desperate)
+			bugs -= FlxG.random.int(1, (difficulty == 2) ? 3 : 4);
 		score += Rating.getMulti(rating);
 		combo++;
 
@@ -219,6 +243,7 @@ class PlayState extends BeatState
 		note.kill();
 		notes.remove(note);
 		note.destroy();
+		actualNoteLength--;
 	}
 
 	function noteMiss(note:Note):Void
@@ -239,7 +264,7 @@ class PlayState extends BeatState
 	{
 		accuracy = FlxMath.roundDecimal((totalHit / totalNotes) * 100, 2);
 
-		if (notes.length > bugs)
+		if (bugs > actualNoteLength)
 			desperate = true;
 		
 		if (rawBugs <= 0)
@@ -247,9 +272,6 @@ class PlayState extends BeatState
 
 		if (combo > bestCombo)
 			bestCombo = combo;
-
-		trace(combo);
-		trace(bestCombo);
 
 		bugs = Math.round(rawBugs);
 
@@ -291,13 +313,17 @@ class PlayState extends BeatState
 		var count:Int = 0;
 		new FlxTimer().start(Conductor.crochet / 1000, function(_:FlxTimer)
 		{
-			trace(count);
 			count++;
 		}, 5);
 	}
 
 	function loadSong(song:String):Void
 	{
+		noteUnderlay = new FlxSprite().makeGraphic(FlxG.width, 100, FlxColor.BLACK);
+		noteUnderlay.screenCenter();
+		noteUnderlay.alpha = 0.8;
+		add(noteUnderlay);
+
 		notes = new FlxTypedGroup<Note>();
 		add(notes);
 
@@ -320,7 +346,8 @@ class PlayState extends BeatState
 			}
 		}
 
-		noteAmount = notes.length;
+		//notes.sort((a.songTime, b.songTime) -> a.songTime - b.songTime);
+		actualNoteLength = noteAmount = notes.length;
 		trace("Generated Song?");
 	}
 }

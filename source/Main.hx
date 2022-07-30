@@ -1,12 +1,12 @@
 package;
 
-import states.TitleState;
-//import states.IntroState;
-import openfl.display.FPS;
-import states.PlayState;
-import flixel.FlxState;
-import flixel.FlxGame;
 import openfl.display.Sprite;
+import openfl.display.FPS;
+
+import flixel.FlxGame;
+import flixel.FlxState;
+
+import states.*;
 
 class Main extends Sprite
 {

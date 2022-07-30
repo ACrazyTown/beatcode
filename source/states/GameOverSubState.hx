@@ -1,5 +1,7 @@
 package states;
 
+import flixel.system.FlxSound;
+import props.ScrollBackground;
 import flixel.addons.text.FlxTypeText;
 import flixel.math.FlxMath;
 import flixel.system.macros.FlxMacroUtil;
@@ -40,6 +42,10 @@ class GameOverSubState extends FlxSubState
         "Generating"
     ];
 
+	var background:FlxSprite;
+    var scrollBg:FlxSprite;
+	var overlay:FlxSprite;
+
     var introDone:Bool = false;
 	var dTxt:DotText;
 
@@ -57,7 +63,16 @@ class GameOverSubState extends FlxSubState
 
 		songRating = Rating.getRank(ps.score, ps.noteAmount);
 
-        var overlay:FlxSprite = new FlxSprite().makeGraphic(FlxG.width, FlxG.height, FlxColor.BLACK);
+		background = new FlxSprite().makeGraphic(FlxG.width, FlxG.height, FlxColor.BLACK);
+        background.active = false;
+		add(background);
+
+		scrollBg = new ScrollBackground(FlxG.width, FlxG.height, 0xFF163a82, 15, 15, 0xFF3ea6cf);
+        scrollBg.active = false;
+		add(scrollBg);
+
+        overlay = new FlxSprite().makeGraphic(FlxG.width, FlxG.height, FlxColor.BLACK);
+        overlay.active = false;
         add(overlay);
 
         dTxt = new DotText(10, 15, 0, FlxG.random.getObject(nerdShit), 24);
@@ -66,15 +81,16 @@ class GameOverSubState extends FlxSubState
         dTxt.antialiasing = false;
         add(dTxt);
 
-        FlxG.sound.playMusic(Asset.sound("beepboop"), 0.65, false);
+        var modemShit:FlxSound = new FlxSound().loadEmbedded(Asset.sound("beepboop"));
+        modemShit.volume = 0.65;
+        modemShit.play();
+        FlxG.sound.list.add(modemShit);
 
-        trace(FlxG.sound.music.length);
-
-		var bruh:Float = (FlxG.sound.music.length / 4) - FlxG.random.int(256, 1024);
+		var bruh:Float = (modemShit.length / 4) - FlxG.random.int(256, 1024);
         new FlxTimer().start(bruh / 1000, function(_:FlxTimer)
         {
             trace("bruh");
-            FlxG.sound.music.stop();
+            modemShit.stop();
             createUI();
         });
     }
@@ -155,6 +171,8 @@ class GameOverSubState extends FlxSubState
 					proceedText.start();
 				}
 			});
+            scrollBg.active = true;
+            FlxTween.tween(overlay, {alpha: 0.8});
         });
     }
 
@@ -165,8 +183,7 @@ class GameOverSubState extends FlxSubState
             realScore = Std.int(FlxMath.lerp(realScore, ps.score, 0.4));
             realMiss = Std.int(FlxMath.lerp(realMiss, ps.misses, 0.4));
             realAcc = FlxMath.roundDecimal(FlxMath.lerp(realAcc, ps.accuracy, 0.4), 2);
-            realBC = FlxMath.roundDecimal(FlxMath.lerp(realBC, ps.bestCombo, 0.4), 0) + 1; //I dont even know
-            statTxt.text = 'Score: $realScore | Misses: $realMiss | Accuracy: $realAcc% | Best Combo: $realBC';
+            statTxt.text = 'Score: $realScore | Misses: $realMiss | Accuracy: $realAcc% | Best Combo: ${ps.bestCombo}';
             statTxt.screenCenter(X);
         }
 

@@ -17,7 +17,9 @@ class TutorialSubState extends FlxSubState
         "This game is a bit different than\nother rhythm games, so it might be\nbest to have a tutorial!\n",
         "The point of the game is to get rid of all the bugs\n(Shown by the counter below)\n",
         "To get rid of them, you must hit Good or Amazing notes.",
-        "Hitting or missing bad notes increases the bug amount by 0.25"
+        "Hitting or missing bad notes increases the bug amount by 0.25",
+        "In order to win, the bug counter must reach 0.",
+        "Good luck!"
     ];
     
 	var overlay:FlxSprite;

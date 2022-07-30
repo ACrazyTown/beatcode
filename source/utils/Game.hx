@@ -9,6 +9,9 @@ class Game
     {
         if (FlxG.save.data.sawTutorial == null)
             FlxG.save.data.sawTutorial = false;
+
+		if (FlxG.save.data.cameraBop == null)
+			FlxG.save.data.cameraBop = true;
     }
 
 	public static function getBugAmount(diff:Int = 1, chart:ChartFile):Int

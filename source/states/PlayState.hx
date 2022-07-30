@@ -1,5 +1,6 @@
 package states;
 
+import flixel.input.keyboard.FlxKey;
 import flixel.graphics.frames.FlxFrame;
 import utils.Game;
 import flixel.FlxCamera;
@@ -158,7 +159,18 @@ class PlayState extends BeatState
 
 	function keyCheck():Void
 	{
-		var press:Bool = FlxG.keys.justPressed.ANY;
+		var keyCode:Int = FlxG.keys.firstJustPressed();
+
+		switch (keyCode)
+		{
+			case FlxKey.NONE:
+				return;
+
+			case FlxKey.ESCAPE:
+				trace("");
+		}
+
+		var press:Bool = FlxG.keys.anyJustPressed([keyCode]);
 
 		if (press)
 		{
@@ -202,7 +214,7 @@ class PlayState extends BeatState
 		score += Rating.getMulti(rating);
 		combo++;
 
-		FlxG.camera.zoom += 0.035;
+		FlxG.camera.zoom += 0.02;
 
 		note.kill();
 		notes.remove(note);

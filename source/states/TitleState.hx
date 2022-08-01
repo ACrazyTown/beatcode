@@ -29,6 +29,11 @@ class TitleState extends FlxTransitionableState
 
     override function create():Void
     {
+        #if FLX_MOUSE
+        if (FlxG.mouse.visible)
+            FlxG.mouse.visible = false;
+        #end
+
         if (!Game.initTransition)
         {
 			var diamond:FlxGraphic = FlxGraphic.fromClass(GraphicTransTileDiamond);

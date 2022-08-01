@@ -49,7 +49,7 @@ typedef BCChartFile =
 	chartVersion:String
 }
 
-class Converter
+class FNFToBC
 {
 	static function main()
 	{

@@ -1,5 +1,7 @@
 package states;
 
+import utils.Song.SongMetadata;
+import openfl.Assets;
 import flixel.input.actions.FlxAction;
 import utils.Game;
 import props.ui.ScrollBackground;
@@ -42,6 +44,8 @@ class FreeplayState extends FlxTransitionableState
             showFolder: false,
         }
     ];
+    
+    var categoryTextGroup:FlxTypedGroup<FlxText>;
     var songTextGroup:FlxTypedGroup<FlxText>;
 
     var curSelected:Int = 0;
@@ -128,12 +132,4 @@ typedef FreeplayCategory =
     autoExpand:Bool,
     showFolder:Bool,
     ?url:String
-}
-
-typedef SongMetadata =
-{
-    name:String,
-    author:String,
-    bpm:Int,
-    ?downloaded:Bool,
 }

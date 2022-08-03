@@ -30,13 +30,21 @@ typedef ChartSection =
     noteTimes:Array<Float>
 }
 
+typedef ChartMetadata = 
+{
+	author:String,
+    ?album:String, 
+    ?year:String,
+}
+
 typedef ChartFile =
 {
-    song:String,
-    bpm:Int,
-    speed:Float,
-    sections:Array<ChartSection>,
-    chartVersion:String
+	song:String,
+	meta:ChartMetadata,
+	bpm:Int,
+	speed:Float,
+	sections:Array<ChartSection>,
+	chartVersion:String
 }
 
 class ChartEditor extends BeatState
@@ -70,6 +78,9 @@ class ChartEditor extends BeatState
             this.CHART =
             {
                 song: "Test",
+                meta: {
+                    author: "A Crazy Town"
+                },
                 bpm: 140,
                 speed: 1,
 				//noteTimes: [
@@ -196,6 +207,9 @@ class ChartEditor extends BeatState
                 loadSong(songName.text);
                 CHART = {
                     song: songName.text,
+                    meta: {
+                        author: "Unknown"
+                    },
                     bpm: 120,
                     speed: 1,
                     sections: [

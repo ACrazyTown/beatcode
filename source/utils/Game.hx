@@ -1,8 +1,9 @@
 package utils;
 
-import states.FreeplayState.SongMetadata;
-import flixel.FlxObject;
-import flixel.util.FlxSort;
+import utils.Song.SongMetadata;
+#if sys
+import sys.FileSystem;
+#end
 import props.Note;
 import flixel.FlxG;
 import editor.ChartEditor;
@@ -31,9 +32,29 @@ class Game
 		}
 	];
 
-	public static function getCommunitySongs():Array<Dynamic>
+	public static function getCommunitySongs():Array<SongMetadata>
 	{
-		return [];
+		var songs:Array<SongMetadata> = [];
+
+		#if sys
+		for (path in FileSystem.readDirectory(FileSystem.absolutePath("assets/songs/base")))
+		{
+			if (!FileSystem.isDirectory(path))
+				continue;
+
+			trace(path);
+			var songPath:String = 'assets/songs/base/$path';
+			for (songFile in FileSystem.readDirectory(FileSystem.absolutePath(songPath)))
+			{
+				var meta:SongMetadata = Song.metaFromChart(Asset.chart(songFile, "base"));
+				if (FileSystem.exists('$songPath/$path${Asset.AUDIO_EXT}') 
+					&& FileSystem.exists('$songPath/$path.json') && !songs.contains(meta))
+					songs.push(meta);
+			}
+		}
+		#end
+
+		return songs;
 	}
 
     public static function initSaveFile():Void

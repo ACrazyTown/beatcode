@@ -35,6 +35,13 @@ typedef FNFChartFile = {
 	song:FNFChartData
 }
 
+typedef BCMetaData = 
+{
+	author:String,
+	?album:String,
+	?year:String,
+}
+
 typedef BCChartSection =
 {
 	noteTimes:Array<Float>
@@ -43,6 +50,7 @@ typedef BCChartSection =
 typedef BCChartFile =
 {
 	song:String,
+	meta:BCMetaData,
 	bpm:Int,
 	speed:Float,
 	sections:Array<BCChartSection>,
@@ -66,10 +74,13 @@ class FNFToBC
 		var bc:BCChartFile = 
 		{
 			song: "Test",
+			meta: {
+				author: "Unknown"
+			},
 			bpm: 140,
 			speed: 1,
 			sections: [],
-			chartVersion: "0.1_fnftobc"
+			chartVersion: "0.1.1_fnftobc"
 		}
 		
 		bc.song = fnf.song.song;

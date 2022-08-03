@@ -1,5 +1,6 @@
 package states;
 
+import openfl.Lib;
 import flixel.tweens.FlxTween;
 import flixel.util.FlxColor;
 import states.substate.GameOverSubState;
@@ -80,6 +81,9 @@ class PlayState extends BeatState
 	override public function create():Void
 	{
 		instance = this;
+
+		//FlxG.signals.focusGained.add(onFocus);
+		//FlxG.signals.focusLost.add(onFocusLost);
 
 		gameCam = new FlxCamera();
 		hudCam = new FlxCamera();
@@ -312,6 +316,8 @@ class PlayState extends BeatState
 			if (FlxG.sound.music.playing)
 				FlxG.sound.music.stop();
 		}
+
+		FlxTween.tween(hudCam, {alpha: 0}, 1.5);
 
 		super.openSubState(new GameOverSubState());
 	}

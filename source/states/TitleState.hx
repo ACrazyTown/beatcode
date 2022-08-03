@@ -29,6 +29,8 @@ class TitleState extends FlxTransitionableState
 
     override function create():Void
     {
+        trace(Game.getCommunitySongs());
+
         #if FLX_MOUSE
         if (FlxG.mouse.visible)
             FlxG.mouse.visible = false;

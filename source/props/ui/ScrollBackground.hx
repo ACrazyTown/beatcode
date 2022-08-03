@@ -1,10 +1,9 @@
-package props;
+package props.ui;
 
 import flixel.FlxG;
 import flixel.addons.display.FlxGridOverlay;
 import flixel.FlxSprite;
 import flixel.util.FlxColor;
-import flixel.system.FlxAssets.FlxGraphicAsset;
 import flixel.group.FlxSpriteGroup;
 
 class ScrollBackground extends FlxSpriteGroup

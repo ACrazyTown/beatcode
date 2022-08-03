@@ -1,5 +1,6 @@
 package utils;
 
+import states.FreeplayState.SongMetadata;
 import flixel.FlxObject;
 import flixel.util.FlxSort;
 import props.Note;
@@ -16,6 +17,24 @@ typedef SongScoreData =
 class Game
 {
 	public static var initTransition:Bool = false;
+	public static var songs:Array<SongMetadata> =
+	[
+		{
+			name: "Tutorial",
+			author: "A Crazy Town",
+			bpm: 140
+		}, 
+		{
+			name: "Syntax",
+			author: "DespawnedDiamond",
+			bpm: 125
+		}
+	];
+
+	public static function getCommunitySongs():Void
+	{
+		return [];
+	}
 
     public static function initSaveFile():Void
     {

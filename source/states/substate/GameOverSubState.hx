@@ -13,8 +13,8 @@ import flixel.tweens.FlxEase;
 import flixel.tweens.FlxTween;
 import flixel.util.FlxColor;
 import flixel.util.FlxTimer;
-import props.DotText;
-import props.ScrollBackground;
+import props.ui.DotText;
+import props.ui.ScrollBackground;
 import utils.Asset;
 import utils.Rating;
 

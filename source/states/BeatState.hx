@@ -1,7 +1,6 @@
 package states;
 
 import flixel.addons.ui.FlxUIState;
-import flixel.FlxState;
 import utils.Conductor;
 
 // from FNF : ) I cannot math

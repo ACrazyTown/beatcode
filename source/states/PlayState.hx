@@ -7,7 +7,6 @@ import states.substate.TutorialSubState;
 import states.substate.PauseSubState;
 import flixel.FlxSubState;
 import flixel.input.keyboard.FlxKey;
-import flixel.graphics.frames.FlxFrame;
 import utils.Game;
 import flixel.FlxCamera;
 import utils.Rating;
@@ -286,7 +285,7 @@ class PlayState extends BeatState
 	{
 		songStarting = false;
 		Conductor.changeBPM(140);
-		FlxG.sound.playMusic(Asset.music(_chart.song.toLowerCase()), 1, false);
+		FlxG.sound.playMusic(Asset.song(_chart.song.toLowerCase()), 1, false);
 		FlxG.sound.music.onComplete = songEnd;
 	}
 

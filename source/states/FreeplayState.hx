@@ -1,6 +1,8 @@
 package states;
 
-import props.ScrollBackground;
+import flixel.input.actions.FlxAction;
+import utils.Game;
+import props.ui.ScrollBackground;
 import utils.Asset;
 import flixel.FlxSprite;
 import flixel.FlxG;
@@ -11,8 +13,8 @@ import flixel.addons.transition.FlxTransitionableState;
 
 class FreeplayState extends FlxTransitionableState
 {
-    var songs:Array<SongMetadata> = [
-        {
+    /*
+            {
             name: "Tutorial",
             author: "A Crazy Town",
             bpm: 140
@@ -22,6 +24,23 @@ class FreeplayState extends FlxTransitionableState
 			author: "DespawnedDiamond",
 			bpm: 125
 		}
+    */
+
+    var categories:Array<FreeplayCategory> = [
+        {
+            name: "Base Game",
+            id: "base",
+            contents: Game.songs,
+            autoExpand: true,
+            showFolder: false,
+        },
+        {
+            name: "Community Creations",
+            id: "communityc",
+            contents: [],
+            autoExpand: false,
+            showFolder: false,
+        }
     ];
     var songTextGroup:FlxTypedGroup<FlxText>;
 
@@ -38,13 +57,15 @@ class FreeplayState extends FlxTransitionableState
         songTextGroup = new FlxTypedGroup<FlxText>();
         add(songTextGroup);
 
+        /*
         for (i in 0...songs.length)
         {
             var text:FlxText = new FlxText(40, i * 90, 0, songs[i].name, 32);
             text.y += 40;
             text.ID = i;
             songTextGroup.add(text);
-        }
+        }*/
+
 
         changeSelection();
         super.create();
@@ -52,6 +73,11 @@ class FreeplayState extends FlxTransitionableState
 
     override function update(elapsed:Float):Void
     {
+        #if debug
+        if (FlxG.keys.justPressed.ONE)
+            FlxG.switchState(new PlayState("tutorial"));
+        #end
+
         if (FlxG.keys.justPressed.ESCAPE)
             FlxG.switchState(new TitleState());
         if (FlxG.keys.justPressed.UP)
@@ -66,6 +92,7 @@ class FreeplayState extends FlxTransitionableState
 
     function changeSelection(change:Int = 0):Void
     {
+        /*
         curSelected += change;
 
         if (curSelected > songs.length - 1)
@@ -84,17 +111,29 @@ class FreeplayState extends FlxTransitionableState
                 t.text = '> ${songs[t.ID].name}';
             }
         });
+        */
     }
 
     function accept():Void
     {
-        FlxG.switchState(new PlayState(songs[curSelected].name));
+        //FlxG.switchState(new PlayState(songs[curSelected].name));
     }
+}
+
+typedef FreeplayCategory =
+{
+    name:String,
+    id:String,
+    contents:Array<SongMetadata>,
+    autoExpand:Bool,
+    showFolder:Bool,
+    ?url:String
 }
 
 typedef SongMetadata =
 {
     name:String,
     author:String,
-    bpm:Int
+    bpm:Int,
+    ?downloaded:Bool,
 }

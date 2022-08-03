@@ -21,9 +21,15 @@ class Asset
         return 'assets/sounds/$filename$AUDIO_EXT';
     }
 
-    public static inline function chart(song:String):String
+    public static inline function chart(song:String, library:String = "base"):String
     {
-        return 'assets/data/charts/${song.toLowerCase()}.json';
+        //return 'assets/data/charts/${song.toLowerCase()}.json';
+        return 'assets/songs/$library/$song/$song.json';
+    }
+
+    public static inline function song(song:String, library:String = "base"):String
+    {
+        return 'assets/songs/$library/$song/$song$AUDIO_EXT';
     }
 
     public static inline function font(font:String, ?ext:String = ".ttf"):String

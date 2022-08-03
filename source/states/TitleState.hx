@@ -7,7 +7,7 @@ import flixel.addons.transition.FlxTransitionSprite.GraphicTransTileDiamond;
 import flixel.addons.transition.TransitionData;
 import flixel.addons.transition.FlxTransitionableState;
 import utils.Game;
-import props.ScrollBackground;
+import props.ui.ScrollBackground;
 import lime.app.Application;
 import flixel.FlxG;
 import flixel.group.FlxGroup.FlxTypedGroup;

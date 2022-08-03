@@ -1,5 +1,6 @@
 package utils;
 
+import openfl.media.Sound;
 import openfl.Assets;
 
 class Asset 
@@ -35,5 +36,18 @@ class Asset
     public static inline function font(font:String, ?ext:String = ".ttf"):String
     {
         return 'assets/fonts/$font$ext';
+    }
+
+    public static function cacheSound(file:Dynamic):Bool
+    {
+		var val:Bool = false;
+
+		if (Assets.exists(file, SOUND) || Assets.exists(file, MUSIC))
+		{
+			Assets.getSound(file, true);
+			val = true;
+		}
+
+		return val;
     }
 }

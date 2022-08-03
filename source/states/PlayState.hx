@@ -34,6 +34,9 @@ class PlayState extends BeatState
 		"Syntax"
 	];
 
+	var hudCam:FlxCamera;
+	var gameCam:FlxCamera;
+
 	static var curSong:String = "Tutorial";
 	var difficulty:Int = 2;
 	var speed:Float = 1;
@@ -78,6 +81,15 @@ class PlayState extends BeatState
 	{
 		instance = this;
 
+		gameCam = new FlxCamera();
+		hudCam = new FlxCamera();
+		hudCam.bgColor.alpha = 0;
+
+		FlxG.cameras.reset(gameCam);
+		FlxG.cameras.add(hudCam, false);
+
+		FlxG.cameras.setDefaultDrawTarget(gameCam, true);
+
 		bg = new FlxSprite(0, 0, "assets/images/sooz.png");
 		add(bg);
 		bg.alpha = 0.5;
@@ -105,6 +117,10 @@ class PlayState extends BeatState
 		add(bugsTxt);
 
 		//openSubState(new TutorialSubState());
+
+		strumline.cameras = [hudCam];
+		statsTxt.cameras = [hudCam];
+		bugsTxt.cameras = [hudCam];
 
 		countdown();
 		super.create();
@@ -214,6 +230,7 @@ class PlayState extends BeatState
 		note.hit = true;
 
 		var rating:String = Rating.rate(Conductor.songPosition - note.songTime, note);
+		trace('tn: $totalNotes | th: $totalHit | ra: $rating');
 		totalNotes++;
 
 		switch (rating.toLowerCase())
@@ -221,15 +238,14 @@ class PlayState extends BeatState
 			//case "bad": totalHit += 0.33;
 			case "bad":
 				rawBugs += 0.1;
-				totalHit += 0.5;
 
 			case "good": 
-				totalHit += 0.8;
 				rawBugs--;
-
-			case "amazing": 
 				totalHit++;
+
+			case "amazing":
 				rawBugs--;
+				totalHit++;
 		}
 
 		if (desperate)
@@ -318,6 +334,8 @@ class PlayState extends BeatState
 
 	function loadSong(song:String):Void
 	{
+		Asset.cacheSound(Asset.song(song.toLowerCase()));
+
 		noteUnderlay = new FlxSprite().makeGraphic(FlxG.width, 100, FlxColor.BLACK);
 		noteUnderlay.screenCenter();
 		noteUnderlay.alpha = 0.8;

@@ -31,7 +31,7 @@ class Game
 		}
 	];
 
-	public static function getCommunitySongs():Void
+	public static function getCommunitySongs():Array<Dynamic>
 	{
 		return [];
 	}

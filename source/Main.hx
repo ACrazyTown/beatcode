@@ -1,7 +1,9 @@
 package;
 
 import openfl.display.Sprite;
+#if debug
 import openfl.display.FPS;
+#end
 
 import flixel.FlxGame;
 import flixel.FlxState;

@@ -21,7 +21,8 @@ class PauseSubState extends FlxSubState
         super();
         trace("hi from puase");
 
-        FlxG.sound.music.pause();
+        if (FlxG.sound.music != null && FlxG.sound.music.playing)
+            FlxG.sound.music.pause();
     
         var overlay:FlxSprite = new FlxSprite().makeGraphic(FlxG.width, FlxG.height, FlxColor.BLACK);
         overlay.alpha = 0.7;
@@ -82,11 +83,14 @@ class PauseSubState extends FlxSubState
     {
         switch (curSelected)
         {
-            case 0: 
-                FlxG.sound.music.play();
+            case 0:
+				if (FlxG.sound.music != null && FlxG.sound.music.playing)
+                    FlxG.sound.music.play();
                 close();
-            case 1: FlxG.resetState();
-            case 2: FlxG.switchState(new TitleState());
+            case 1: 
+                FlxG.resetState();
+            case 2: 
+                FlxG.switchState(new TitleState());
         }
     }
 }

@@ -15,11 +15,11 @@ class Rating
         // -50 is the minimum, 100 is the max?
         var rating:String = "Good"; //bad good amazing
 
-        if (diff >= -50 && diff <= 0)
+        if (diff >= -75 && diff <= 0)
             rating = "Amazing";
         else if (diff >= 0 && diff <= 50)
             rating = "Good";
-        else if (diff >= 50 && diff <= 100)
+        else if (diff >= 50 && diff <= 125)
             rating = "Bad";
 
         return rating;

@@ -48,7 +48,9 @@ class FreeplayState extends FlxTransitionableState
     var categoryTextGroup:FlxTypedGroup<FlxText>;
     var songTextGroup:FlxTypedGroup<FlxText>;
 
+    var curCategory:Int = 0;
     var curSelected:Int = 0;
+    var isInCategory:Bool = false;
 
     override function create():Void
     {
@@ -58,8 +60,13 @@ class FreeplayState extends FlxTransitionableState
 		var overlay:FlxSprite = new FlxSprite().loadGraphic(Asset.image("titleOverlay"));
 		add(overlay);
 
+        categoryTextGroup = new FlxTypedGroup<FlxText>();
+        add(categoryTextGroup);
+
         songTextGroup = new FlxTypedGroup<FlxText>();
         add(songTextGroup);
+
+        createText(null, true);
 
         /*
         for (i in 0...songs.length)
@@ -94,6 +101,44 @@ class FreeplayState extends FlxTransitionableState
         super.update(elapsed);
     }
 
+	function createText(?categoryId:String, ?category:Bool = false):Void
+    {
+        category ? songTextGroup.clear() : categoryTextGroup.clear();
+        var group:FlxTypedGroup<FlxText> = category ? categoryTextGroup : songTextGroup;
+
+        for (i in 0...categories.length) 
+        {
+            if (!category)
+            {
+                if (categories[i].id != categoryId)
+                    continue;
+
+                for (j in 0...categories[i].contents.length)
+                {
+					var text:FlxText = new FlxText(40, 40 + (j * 90), 0, categories[i].contents[j].name, 32);
+                    text.ID = j;
+                    songTextGroup.add(text);
+                }
+
+                isInCategory = true;
+                changeSelection();
+            }
+            else
+            {
+                var text:FlxText = new FlxText(40, 40 + (i * 90), 0, categories[i].name, 32);
+                text.ID = i;
+
+                if (categories[i].contents.length <= 0)
+                {
+                    text.color = FlxColor.GRAY;
+                    text.italic = true;
+                }
+
+                categoryTextGroup.add(text);
+            }
+        }
+    }
+
     function changeSelection(change:Int = 0):Void
     {
         /*
@@ -116,11 +161,82 @@ class FreeplayState extends FlxTransitionableState
             }
         });
         */
+
+        /*
+		var index:Int = isInCategory ? curSelected : curCategory;
+		var group:FlxTypedGroup<FlxText> = isInCategory ? songTextGroup: categoryTextGroup;
+		var array:Array<Dynamic> = isInCategory ? categories[curCategory].contents : categories;
+
+        index += change;
+
+        if (index > array.length - 1)
+            index = 0;
+        if (index < 0)
+            index = array.length - 1;
+
+        group.forEach(function(t:FlxText)
+        {
+            t.color = FlxColor.WHITE;
+
+            if (t.ID == index)
+            {
+                if (!t.italic)
+                    t.color = FlxColor.YELLOW;
+            }
+        });
+        */
+
+        if (!isInCategory)
+        {
+            curCategory += change;
+
+            if (curCategory > categories.length - 1)
+                curCategory = 0;
+            if (curCategory < 0)
+                curCategory = categories.length - 1;
+
+            categoryTextGroup.forEach(function(t:FlxText)
+            {
+                t.color = FlxColor.WHITE;
+
+                if (t.ID == curCategory)
+                    t.color = FlxColor.YELLOW;
+            });
+        }
+        else
+        {
+            var cat:FreeplayCategory = categories[curCategory];
+
+            curSelected += change;
+
+            if (curSelected > cat.contents.length - 1)
+                curSelected = 0;
+            if (curSelected < 0)
+                curSelected = cat.contents.length - 1;
+
+            songTextGroup.forEach(function(t:FlxText)
+            {
+				t.color = FlxColor.WHITE;
+
+				if (t.ID == curSelected)
+					t.color = FlxColor.YELLOW;
+            });
+        }
     }
 
     function accept():Void
     {
-        //FlxG.switchState(new PlayState(songs[curSelected].name));
+        if (isInCategory)
+        {
+            // Online songs must check for download!!!
+            FlxG.switchState(new PlayState(categories[curCategory].contents[curSelected].name));
+        }
+        else
+        {
+            var cat:FreeplayCategory = categories[curCategory];
+            if (cat != null && cat.contents.length > 0)
+                createText(cat.id);
+        }
     }
 }
 

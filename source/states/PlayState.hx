@@ -64,7 +64,7 @@ class PlayState extends BeatState
 
 	var bugsTxt:FlxText;
 	var statsTxt:FlxText;
-
+	
 	// If it's (almost) impossible to beat a song, this will grant extra bugfixes
 	var actualNoteLength:Int = 0; // notes.length doesnt update for some reason
 	var desperate:Bool = false;
@@ -107,6 +107,7 @@ class PlayState extends BeatState
 
 		statsTxt = new FlxText(0, 0, 0, 'SCORE: $score ~ MISSES: $misses ~ ACCURACY: $accuracy', 20);
 		statsTxt.font = "FORCED SQUARE";
+		statsTxt.setBorderStyle(OUTLINE, FlxColor.BLACK, 2, 1);
 		statsTxt.y = (FlxG.height - statsTxt.height) - 5;
 		statsTxt.screenCenter(X);
 		add(statsTxt);
@@ -118,6 +119,7 @@ class PlayState extends BeatState
 		bugsTxt.font = "FORCED SQUARE";
 		bugsTxt.y = (statsTxt.y - bugsTxt.height) - 5;
 		bugsTxt.screenCenter(X);
+		bugsTxt.setBorderStyle(OUTLINE, 0xFF42130E, 2, 1);
 		add(bugsTxt);
 
 		//openSubState(new TutorialSubState());
@@ -349,6 +351,9 @@ class PlayState extends BeatState
 
 		notes = new FlxTypedGroup<Note>();
 		add(notes);
+
+		noteUnderlay.cameras = [hudCam];
+		notes.cameras = [hudCam];
 
 		_chart = Json.parse(Assets.getText(Asset.chart(song.toLowerCase())));
 

@@ -76,4 +76,14 @@ class Combo extends FlxSpriteGroup
 		hideTimer += elapsed;
         super.update(elapsed);
     }
+
+    override function destroy():Void
+    {
+        combo = 0;
+        if (comboTxt != null)
+            comboTxt.destroy();
+        if (amountTxt != null)
+            amountTxt.destroy();
+        super.destroy();
+    }
 }

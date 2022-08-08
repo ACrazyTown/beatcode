@@ -1,5 +1,9 @@
 {
 	"chartVersion": "converter",
+	"meta": {
+		"author": "A Crazy Town",
+		"year": "2022"
+	},
 	"sections": [
 		{
 			"noteTimes": [

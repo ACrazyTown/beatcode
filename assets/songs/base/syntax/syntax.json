@@ -1,5 +1,9 @@
 {
 	"chartVersion": "0.1_fnftobc",
+	"meta": {
+		"author": "DespawnedDiamond",
+		"year": "2022"
+	},
 	"sections": [
 		{
 			"noteTimes": [

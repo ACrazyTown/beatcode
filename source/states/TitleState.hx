@@ -36,6 +36,8 @@ class TitleState extends FlxTransitionableState
             FlxG.mouse.visible = false;
         #end
 
+        Game.getCommunitySongs();
+
         if (!Game.initTransition)
         {
 			var diamond:FlxGraphic = FlxGraphic.fromClass(GraphicTransTileDiamond);

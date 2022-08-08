@@ -39,4 +39,13 @@ class ScrollBackground extends FlxSpriteGroup
 
 		super.update(elapsed);
 	}
+
+	override function destroy():Void
+	{
+		if (background != null)
+			background.destroy();
+		if (gridBackground != null)
+			gridBackground.destroy();
+		super.destroy();
+	}
 }

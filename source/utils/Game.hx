@@ -42,7 +42,7 @@ class Game
 		}
 	];
 
-	public static function getCommunitySongs():Array<SongMetadata>
+	public static function getCommunitySongs(?onComplete:Void->Void):Array<SongMetadata>
 	{
 		/*
 		var songs:Array<SongMetadata> = [];
@@ -81,10 +81,24 @@ class Game
 			}
 		};
 
+		osReq.request();
+
 		#if sys
-		// Direct filesystem
+		// Direct filesystem access
+		for (songName in FileSystem.readDirectory(FileSystem.absolutePath("assets/songs/base")))
+		{
+			if (Song.isValidSongPath(songName, "base"))
+			{
+				var meta:SongMetadata = Song.metaFromChart(Asset.chart(songName, "base"));
+				if (!songs.contains(meta))
+					songs.push(meta);
+			}
+		}
+
 		#end
 
+		if (onComplete != null)
+			onComplete();
 		return songs;
 	}
 

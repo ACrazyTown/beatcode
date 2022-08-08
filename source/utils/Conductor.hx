@@ -10,8 +10,6 @@ class Conductor
 	public static var safeFrames:Int = 5;
 	public static var safeZoneOffset:Float = (safeFrames / 60) * 1000;
 
-	public function new() {}
-
 	public static function changeBPM(newBPM:Int)
 	{
 		bpm = newBPM;

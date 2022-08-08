@@ -32,16 +32,12 @@ class FreeplayState extends FlxTransitionableState
         {
             name: "Base Game",
             id: "base",
-            contents: Game.songs,
-            autoExpand: true,
-            showFolder: false,
+            contents: Game.songs
         },
         {
             name: "Community Creations",
             id: "communityc",
-            contents: [],
-            autoExpand: false,
-            showFolder: false,
+            contents: []
         }
     ];
     
@@ -90,7 +86,12 @@ class FreeplayState extends FlxTransitionableState
         #end
 
         if (FlxG.keys.justPressed.ESCAPE)
-            FlxG.switchState(new TitleState());
+        {
+            if (isInCategory)
+                createText(null, true);
+            else
+                FlxG.switchState(new TitleState());
+        }
         if (FlxG.keys.justPressed.UP)
             changeSelection(-1);
         if (FlxG.keys.justPressed.DOWN)
@@ -135,6 +136,8 @@ class FreeplayState extends FlxTransitionableState
                 }
 
                 categoryTextGroup.add(text);
+				isInCategory = false;
+                changeSelection();
             }
         }
     }
@@ -186,6 +189,9 @@ class FreeplayState extends FlxTransitionableState
         });
         */
 
+        if (change != 0)
+            FlxG.sound.play(Asset.SND_UI_SELECT, 0.7);
+
         if (!isInCategory)
         {
             curCategory += change;
@@ -226,6 +232,8 @@ class FreeplayState extends FlxTransitionableState
 
     function accept():Void
     {
+        FlxG.sound.play(Asset.SND_UI_CONFIRM, 0.7);
+
         if (isInCategory)
         {
             // Online songs must check for download!!!
@@ -234,6 +242,11 @@ class FreeplayState extends FlxTransitionableState
         else
         {
             var cat:FreeplayCategory = categories[curCategory];
+
+            if (cat.id == "communityc" && cat.contents.length <= 0 
+                && !Globals.gotOnlineCCList) 
+                cat.contents = Game.getCommunitySongs();
+
             if (cat != null && cat.contents.length > 0)
                 createText(cat.id);
         }
@@ -245,7 +258,5 @@ typedef FreeplayCategory =
     name:String,
     id:String,
     contents:Array<SongMetadata>,
-    autoExpand:Bool,
-    showFolder:Bool,
     ?url:String
 }

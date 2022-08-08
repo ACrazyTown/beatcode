@@ -1,12 +1,15 @@
 package utils;
 
+import utils.Song.OnlineSongManifest;
+import haxe.Json;
+import haxe.Http;
 import utils.Song.SongMetadata;
 #if sys
 import sys.FileSystem;
 #end
 import props.Note;
 import flixel.FlxG;
-import editor.ChartEditor;
+import utils.Chart;
 
 typedef SongScoreData =
 {
@@ -15,8 +18,15 @@ typedef SongScoreData =
 	bestAccuracy:Float,
 }
 
+class Globals
+{
+	public static var gotOnlineCCList:Bool = false;
+}
+
 class Game
 {
+	//public static var globals:Class<Globals> = Globals;
+
 	public static var initTransition:Bool = false;
 	public static var songs:Array<SongMetadata> =
 	[
@@ -34,6 +44,7 @@ class Game
 
 	public static function getCommunitySongs():Array<SongMetadata>
 	{
+		/*
 		var songs:Array<SongMetadata> = [];
 
 		#if sys
@@ -52,6 +63,26 @@ class Game
 					songs.push(meta);
 			}
 		}
+		#end
+
+		return songs;
+		*/
+
+		var songs:Array<SongMetadata> = [];
+		var osReq:Http = new Http("https://raw.githubusercontent.com/ACrazyTown/haxejamsummer22/main/online/manifest.json");
+
+		osReq.onData = (data:String) -> {
+			var json:OnlineSongManifest = Json.parse(data);
+
+			for (song in json.songs)
+			{
+				song.downloaded = false;
+				songs.push(song);
+			}
+		};
+
+		#if sys
+		// Direct filesystem
 		#end
 
 		return songs;

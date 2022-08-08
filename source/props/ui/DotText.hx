@@ -1,8 +1,6 @@
 package props.ui;
 
-import flixel.text.FlxText;
-
-class DotText extends FlxText
+class DotText extends flixel.text.FlxText
 {
     public var updateTime:Float = 0.5;
     var ogText:String;

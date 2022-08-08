@@ -7,6 +7,10 @@ class Asset
 {
     public static var AUDIO_EXT:String = #if desktop ".ogg" #else ".mp3" #end;
 
+    // Globals
+    public static var SND_UI_SELECT:String = Asset.sound("uiSelect");
+    public static var SND_UI_CONFIRM:String = Asset.sound("uiConfirm");
+
     public static inline function image(filename:String):String
     {
         return 'assets/images/$filename.png';

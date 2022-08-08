@@ -19,7 +19,9 @@ class PauseSubState extends FlxSubState
     public function new():Void
     {
         super();
-        trace("hi from puase");
+
+        if (PlayState.instance != null && PlayState.instance.hudCam.visible)
+            PlayState.instance.hudCam.visible = false;
 
         if (FlxG.sound.music != null && FlxG.sound.music.playing)
             FlxG.sound.music.pause();
@@ -84,8 +86,12 @@ class PauseSubState extends FlxSubState
         switch (curSelected)
         {
             case 0:
-				if (FlxG.sound.music != null && FlxG.sound.music.playing)
+				if (PlayState.instance != null)
+					PlayState.instance.hudCam.visible = true;
+
+				if (FlxG.sound.music != null)
                     FlxG.sound.music.play();
+
                 close();
             case 1: 
                 FlxG.resetState();

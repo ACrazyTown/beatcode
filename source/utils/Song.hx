@@ -1,7 +1,7 @@
 package utils;
 
 import haxe.Json;
-import editor.ChartEditor.ChartFile;
+import utils.Chart.ChartFile;
 import openfl.Assets;
 
 typedef SongMetadata =
@@ -12,6 +12,11 @@ typedef SongMetadata =
 	?downloaded:Bool,
 }
 
+typedef OnlineSongManifest =
+{
+	songs:Array<SongMetadata>
+}
+
 class Song
 {
     public static function metaFromChart(path:String):SongMetadata
@@ -20,6 +25,8 @@ class Song
             return null;
 
         var chart:ChartFile = Json.parse(path);
+        // var versionStuff:Array<String> = chart.chartVersion.split("_"); // 0 is the actual version, 1 should be other stuff
+
 		var meta:SongMetadata = 
         {
             name: chart.song,

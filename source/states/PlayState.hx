@@ -1,5 +1,6 @@
 package states;
 
+import props.ui.Combo;
 import openfl.Lib;
 import flixel.tweens.FlxTween;
 import flixel.util.FlxColor;
@@ -14,7 +15,7 @@ import utils.Rating;
 import flixel.math.FlxMath;
 import flixel.text.FlxText;
 import haxe.Json;
-import editor.ChartEditor.ChartFile;
+import utils.Chart.ChartFile;
 import openfl.Assets;
 import flixel.util.FlxTimer;
 import props.Note;
@@ -35,8 +36,8 @@ class PlayState extends BeatState
 		"Syntax"
 	];
 
-	var hudCam:FlxCamera;
-	var gameCam:FlxCamera;
+	public var hudCam:FlxCamera;
+	public var gameCam:FlxCamera;
 
 	static var curSong:String = "Tutorial";
 	var difficulty:Int = 2;
@@ -51,6 +52,7 @@ class PlayState extends BeatState
 	var rawBugs:Float = 0;
 	public var bugs:Int = 0;
 	
+	var comboSpr:Combo;
 	public var bestCombo:Int = 0;
 	public var combo:Int = 0;
 	public var score:Int = 0;
@@ -65,8 +67,8 @@ class PlayState extends BeatState
 	var bugsTxt:FlxText;
 	var statsTxt:FlxText;
 	
-	// If it's (almost) impossible to beat a song, this will grant extra bugfixes
 	var actualNoteLength:Int = 0; // notes.length doesnt update for some reason
+	// If it's (almost) impossible to beat a song, this will grant extra bugfixes
 	var desperate:Bool = false;
 
 	public static var instance:PlayState;
@@ -88,10 +90,8 @@ class PlayState extends BeatState
 		gameCam = new FlxCamera();
 		hudCam = new FlxCamera();
 		hudCam.bgColor.alpha = 0;
-
 		FlxG.cameras.reset(gameCam);
 		FlxG.cameras.add(hudCam, false);
-
 		FlxG.cameras.setDefaultDrawTarget(gameCam, true);
 
 		bg = new FlxSprite(0, 0, "assets/images/sooz.png");
@@ -104,6 +104,10 @@ class PlayState extends BeatState
 		strumline.x = (FlxG.width - strumline.width) - 75;
 		strumline.alpha = 0.5;
 		add(strumline);
+
+		comboSpr = new Combo();
+		comboSpr.alpha = 0;
+		add(comboSpr);
 
 		statsTxt = new FlxText(0, 0, 0, 'SCORE: $score ~ MISSES: $misses ~ ACCURACY: $accuracy', 20);
 		statsTxt.font = "FORCED SQUARE";
@@ -127,6 +131,7 @@ class PlayState extends BeatState
 		strumline.cameras = [hudCam];
 		statsTxt.cameras = [hudCam];
 		bugsTxt.cameras = [hudCam];
+		comboSpr.cameras = [hudCam];
 
 		countdown();
 		super.create();
@@ -259,6 +264,8 @@ class PlayState extends BeatState
 		score += Rating.getMulti(rating);
 		combo++;
 
+		comboSpr.updateCombo(combo);
+
 		FlxG.camera.zoom += 0.02;
 
 		note.kill();
@@ -277,6 +284,7 @@ class PlayState extends BeatState
 		score -= Rating.getMulti("bad");
 
 		combo = 0;
+		comboSpr.updateCombo(combo);
 
 		FlxG.sound.play(Asset.sound("bruh"), 0.6);
 	}
@@ -320,7 +328,6 @@ class PlayState extends BeatState
 		}
 
 		FlxTween.tween(hudCam, {alpha: 0}, 1.5);
-
 		super.openSubState(new GameOverSubState());
 	}
 

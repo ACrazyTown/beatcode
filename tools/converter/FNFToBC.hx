@@ -59,7 +59,7 @@ typedef BCChartFile =
 
 class FNFToBC
 {
-	static function main()
+	static function main():Void
 	{
 		var path:String = Sys.args()[0];
 		if (path == null || (path != null && !FileSystem.exists(path)))

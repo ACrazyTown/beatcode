@@ -71,6 +71,9 @@ class PlayState extends BeatState
 	// If it's (almost) impossible to beat a song, this will grant extra bugfixes
 	var desperate:Bool = false;
 
+	var typed:String = "";
+	var typedText:FlxText;
+
 	public static var instance:PlayState;
 
 	public function new(?song:String):Void
@@ -99,6 +102,10 @@ class PlayState extends BeatState
 		bg = new FlxSprite(0, 0, "assets/images/sooz.png");
 		add(bg);
 		bg.alpha = 0.5;
+
+		typedText = new FlxText(353, 124, 460, "", 18);
+		typedText.color = FlxColor.BLACK;
+		add(typedText);
 
 		loadSong(curSong);
 
@@ -147,7 +154,7 @@ class PlayState extends BeatState
 		FlxG.watch.addQuick("desperate", desperate);
 
 		if (FlxG.camera.zoom != 1)
-			FlxG.camera.zoom = FlxMath.lerp(FlxG.camera.zoom, 1, 0.15);
+			FlxG.camera.zoom = FlxMath.lerp(FlxG.camera.zoom, 1, 0.06);
 
 		if (songStarting)
 		{
@@ -223,7 +230,6 @@ class PlayState extends BeatState
 		note.hit = true;
 
 		var rating:String = Rating.rate(Conductor.songPosition - note.songTime, note);
-		trace('tn: $totalNotes | th: $totalHit | ra: $rating');
 		totalNotes++;
 
 		switch (rating.toLowerCase())
@@ -242,13 +248,15 @@ class PlayState extends BeatState
 		}
 
 		if (desperate)
-			bugs -= FlxG.random.int(1, (difficulty == 2) ? 3 : 4);
+			rawBugs -= FlxG.random.int(1, (difficulty == 2) ? 3 : 4);
 		score += Rating.getMulti(rating);
 		combo++;
 
 		comboSpr.updateCombo(combo);
+		typed += note.assignedKey.toString();
+		typedText.text = typed;
 
-		FlxG.camera.zoom += 0.02;
+		FlxG.camera.zoom += 0.02 * (combo / 4);
 
 		note.kill();
 		notes.remove(note, true);

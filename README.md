@@ -2,6 +2,9 @@
 
 A rhythm game where you fix bugs by slamming your keyboard, made for **[HaxeJam: Summer Jam](https://itch.io/jam/haxejam-2022-summer-jam)!**
 
+You can play the original jam version on [itch.io](https://acrazytown.itch.io/beatcode-hxjam22)
+and rarely updated newer versions on [my website](https://acrazytown.com/misc/bc020/)
+
 ## Credits
 
 - Me [(A Crazy Town)](https://twitter.com/acrazytown)

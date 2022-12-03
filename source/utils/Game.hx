@@ -1,5 +1,6 @@
 package utils;
 
+//import macro.SongMacro;
 import utils.Song.OnlineSongManifest;
 import haxe.Json;
 import haxe.Http;
@@ -28,13 +29,13 @@ class Game
 	//public static var globals:Class<Globals> = Globals;
 
 	public static var initTransition:Bool = false;
-	public static var songs:Array<SongMetadata> =
+	public static var songs:Array<SongMetadata> = 
 	[
 		{
 			name: "Tutorial",
 			author: "A Crazy Town",
 			bpm: 140
-		}, 
+		},
 		{
 			name: "Syntax",
 			author: "DespawnedDiamond",

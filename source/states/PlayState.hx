@@ -41,7 +41,7 @@ class PlayState extends BeatState
 
 	static var curSong:String = "Tutorial";
 	var difficulty:Int = 2;
-	var speed:Float = 1;
+	var speed:Float = 0.5;
 
 	public var bg:FlxSprite;
 	var strumline:FlxSprite;
@@ -67,7 +67,7 @@ class PlayState extends BeatState
 	var bugsTxt:FlxText;
 	var statsTxt:FlxText;
 	
-	var actualNoteLength:Int = 0; // notes.length doesnt update for some reason
+	var actualNoteLength:Int = 0; // notes.length doesnt update for some reason, 
 	// If it's (almost) impossible to beat a song, this will grant extra bugfixes
 	var desperate:Bool = false;
 
@@ -90,8 +90,10 @@ class PlayState extends BeatState
 		gameCam = new FlxCamera();
 		hudCam = new FlxCamera();
 		hudCam.bgColor.alpha = 0;
+
 		FlxG.cameras.reset(gameCam);
 		FlxG.cameras.add(hudCam, false);
+
 		FlxG.cameras.setDefaultDrawTarget(gameCam, true);
 
 		bg = new FlxSprite(0, 0, "assets/images/sooz.png");
@@ -170,25 +172,12 @@ class PlayState extends BeatState
 			if (note.x > (FlxG.width + note.width) && !note.isOnScreen(FlxG.camera))
 			{
 				note.kill();
-				notes.remove(note);
+				notes.remove(note, true);
 				note.destroy();
-				actualNoteLength--;
 			}
 
 			note.x = (strumline.x + (Conductor.songPosition - note.songTime) * (0.4 * speed));
 		});
-
-		#if debug
-		if (FlxG.keys.justPressed.R)
-		{
-			if (FlxG.sound.music != null && FlxG.sound.music.playing)
-				FlxG.sound.music.stop();
-			FlxG.resetState();
-		}
-
-		if (FlxG.keys.justPressed.ONE)
-			songEnd();
-		#end
 
 		keyCheck();
 		updateStats();
@@ -210,30 +199,23 @@ class PlayState extends BeatState
 		}
 
 		var press:Bool = FlxG.keys.anyJustPressed([keyCode]);
-
 		if (press)
 		{
-			var rand:Int = FlxG.random.int(0, 5);
-			FlxG.sound.play(Asset.sound('hit$rand'), 0.6);
-		}
+			FlxG.sound.play(Asset.sound('hit${FlxG.random.int(0, 5)}'), 0.6);
 
-		notes.forEach(function(note:Note)
-		{
-			if (press)
+			notes.forEach(function(note:Note)
 			{
-				if (note.canHit)
+				if (press) 
 				{
-					if (!note.hit && !note.late)
-						noteHit(note);
+					if (note.canHit && !note.hit && !note.late)
+					{
+						if (note.assignedKey == keyCode)
+							noteHit(note);
+					}
+
 				}
-				else
-				{
-					//trace((Game.getClosestNote(notes.members, FlxG.sound.music.time)));
-					//noteMiss(notes.members[Game.getClosestNote(notes.members, FlxG.sound.music.time)]);
-					//noteMiss(notes.getFirstAlive());
-				}
-			}
-		});
+			});
+		}
 	}
 
 	function noteHit(note:Note):Void
@@ -269,9 +251,8 @@ class PlayState extends BeatState
 		FlxG.camera.zoom += 0.02;
 
 		note.kill();
-		notes.remove(note);
+		notes.remove(note, true);
 		note.destroy();
-		actualNoteLength--;
 	}
 
 	function noteMiss(note:Note):Void
@@ -283,6 +264,9 @@ class PlayState extends BeatState
 		rawBugs += 0.1;
 		score -= Rating.getMulti("bad");
 
+		note.color = FlxColor.GRAY;
+		note.alpha = 0.4;
+
 		combo = 0;
 		comboSpr.updateCombo(combo);
 
@@ -293,7 +277,7 @@ class PlayState extends BeatState
 	{
 		accuracy = FlxMath.roundDecimal((totalHit / totalNotes) * 100, 2);
 
-		if (bugs > actualNoteLength)
+		if (bugs > notes.length)
 			desperate = true;
 		
 		if (rawBugs <= 0)
@@ -366,7 +350,7 @@ class PlayState extends BeatState
 
 		curSong = _chart.song;
 		Conductor.changeBPM(_chart.bpm);
-		speed = _chart.speed;
+		//speed = _chart.speed;
 
 		for (section in _chart.sections)
 		{
@@ -382,7 +366,7 @@ class PlayState extends BeatState
 		}
 
 		//notes.sort((a.songTime, b.songTime) -> a.songTime - b.songTime);
-		actualNoteLength = noteAmount = notes.length;
+		noteAmount = notes.length;
 		trace("Generated Song?");
 	}
 }
